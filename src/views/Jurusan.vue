@@ -7,7 +7,9 @@
       <div class="card-body">
         <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
           <div class="dataTable-top d-flex justify-content-between">
-            <div class="dataTable-dropdown"><select class="dataTable-selector form-select">
+            <div class="dataTable-dropdown">
+              <select class="dataTable-selector form-select" v-model.number="meta.limit" @change="getPayloadList()">
+                <option value="2">2</option>
                 <option value="10">10</option>
                 <option value="15">15</option>
                 <option value="20">20</option>
@@ -64,7 +66,7 @@ const payloadList = ref()
 
 const meta = reactive({
   search: "",
-  limit: 10,
+  limit: 2,
   page: 1,
   total: 0,
   orderBy: "created_at",
@@ -76,7 +78,10 @@ const getPayloadList = (): void => {
     .then((res: any) => {
       let item = res.data
       payloadList.value = item.data
-      meta.total = 50
+      meta.total = item.meta.total
+      meta.page  = item.meta.page
+      
+      console.log(item);
     })
     .catch((err: any) => {
       console.log(err);
@@ -87,6 +92,8 @@ const getPayloadList = (): void => {
 const paggination = (data: any) => {
   meta.page = data.n_page
 
+  console.log(data);
+  
   getPayloadList()
 }
 
