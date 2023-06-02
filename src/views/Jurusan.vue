@@ -16,12 +16,14 @@
                 <option value="15">15</option>
                 <option value="20">20</option>
                 <option value="25">25</option>
-              </select><label>entries per page</label></div>
+              </select><label>entries per page</label>
+            </div>
             <div class="dataTable-search">
-             <div class="input-group">
-              <span class="input-group-text" id="basic-addon1"><i class="bi bi-search"></i></span>
-              <input class="dataTable-input" placeholder="Search..." type="text" v-model="meta.search" @keyup="getPayloadList()">
-             </div>
+              <div class="input-group">
+                <span class="input-group-text" id="basic-addon1"><i class="bi bi-search"></i></span>
+                <input class="dataTable-input" placeholder="Search..." type="text" v-model="meta.search"
+                  @keyup="getPayloadList()">
+              </div>
             </div>
           </div>
           <div class="dataTable-container">
@@ -29,8 +31,11 @@
               <thead>
                 <tr>
                   <th style="width: 5%;"><a href="#">No.</a></th>
-                  <th style="width: 41.862%;"><a @click="sortingData(meta.sort, '_jurusan')" href="#" class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon._jurusan"></i> Nama</a></th>
-                  <th style="width: 18.8881%;"><a @click="sortingData(meta.sort, 'created_at')" href="#" class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon.created_at"></i> Dibuat</a></th>
+                  <th style="width: 41.862%;"><a @click="sortingData(meta.sort, '_jurusan')" href="#"
+                      class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon._jurusan"></i> Nama</a></th>
+                  <th style="width: 18.8881%;"><a @click="sortingData(meta.sort, 'created_at')" href="#"
+                      class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon.created_at"></i> Dibuat</a>
+                  </th>
                   <th style="width: 16.3429%;"><a href="#" class="dataTable-sorter">Diupdate</a></th>
                   <th style="width: 11.1186%;"><a href="#" class="dataTable-sorter">Aksi</a></th>
                 </tr>
@@ -43,8 +48,8 @@
                   <td>{{ moment(jurusan.updated_at).format('DD, MMMM YYYY') }}</td>
                   <td>
                     <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                        <BaseButton class="btn"><i class="text-primary fas fa-pencil mx-2"></i></BaseButton>
-                        <BaseButton class="btn"><i class="text-danger fas fa-trash mx-2"></i></BaseButton>
+                      <BaseButton class="btn"><i class="text-primary fas fa-pencil mx-2"></i></BaseButton>
+                      <BaseButton class="btn"><i class="text-danger fas fa-trash mx-2"></i></BaseButton>
                     </div>
                   </td>
                 </tr>
@@ -56,8 +61,22 @@
       </div>
     </div>
   </section>
-  <ModalComponent id="myModal" title="Formulir Data"></ModalComponent>
-
+  <ModalComponent size="modal-lg" :is-modal-open="modalStatus" @close="showHideModal" ref="modal">
+    <template v-slot:header>
+      <h4><i class="fa-solid fa-file-invoice me-2"></i> Formulir Data</h4>
+    </template>
+    <template v-slot:body>
+      <div class="mx-2">
+        <p class="text-muted mt-2 mb-3">Harap periksa formulir anda sebelum dikirim dan disimpan.</p>
+        <div class="form-group mb-3">
+          <BaseInput label="Nama Kelas" :required="true" placeholder="Masukan disini..." />
+        </div>
+      </div>
+    </template>
+    <template v-slot:footer>
+      <BaseButton class="btn-default" @event-click="showHideModal">Tutup</BaseButton>
+    </template>
+  </ModalComponent>
 </template>
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
@@ -66,37 +85,38 @@ import moment from 'moment'
 import BaseButton from '@/components/button/BaseButton.vue'
 import Paggination from '../components/skelton/Paggination.vue'
 import ModalComponent from '../components/modal/FormModal.vue'
+import BaseInput from '@/components/input/BaseInput.vue'
 
 
 /* Fungsi untuk mengambil data jurusan */
 const payloadList = ref()
 
 interface SortIcon {
-  _jurusan  : string,
+  _jurusan: string,
   created_at: string
 }
 
 interface Meta {
   sortIcon: SortIcon,
-  search  : string;
-  limit   : number;
-  page    : number;
-  total   : number;
-  orderBy : string;
-  sort    : string;
+  search: string;
+  limit: number;
+  page: number;
+  total: number;
+  orderBy: string;
+  sort: string;
 }
 
 const meta: Meta = reactive({
-  sortIcon : {
-    _jurusan  : 'fa-sort',
+  sortIcon: {
+    _jurusan: 'fa-sort',
     created_at: 'fa-sort-up'
   },
-  search   : "",
-  limit    : 10,
-  page     : 1,
-  total    : 0,
-  orderBy  : "created_at",
-  sort     : "desc"
+  search: "",
+  limit: 10,
+  page: 1,
+  total: 0,
+  orderBy: "created_at",
+  sort: "desc"
 })
 
 const getPayloadList = (): void => {
@@ -105,7 +125,7 @@ const getPayloadList = (): void => {
       let item = res.data
       payloadList.value = item.data
       meta.total = item.meta.total
-      meta.page  = item.meta.page
+      meta.page = item.meta.page
     })
     .catch((err: any) => {
       console.log(err);
@@ -113,8 +133,9 @@ const getPayloadList = (): void => {
 }
 
 /* Fungsi menampilkan modal */
+const modalStatus = ref(false)
 const showHideModal = (): void => {
-  $('#myModal').modal('show') ? $('#myModal').modal('hide') : $('#myModal').modal('show')
+  modalStatus.value = modalStatus.value ? false : true
 }
 
 /* Fungsi untuk mengambil page baru berdasarkan paggination */
@@ -123,8 +144,9 @@ const paggination = (data: any) => {
   getPayloadList()
 }
 
+/* Fungsi untuk mengurutkan data dalam tabel */
 const sortingData = (sort: string, by: keyof SortIcon): void => {
-  
+
   if (sort == 'asc') {
     meta.orderBy = by
     meta.sort = 'desc'
@@ -143,7 +165,7 @@ const sortingData = (sort: string, by: keyof SortIcon): void => {
 
   getPayloadList()
   console.log(sort);
-  
+
 }
 
 onMounted((): void => {
