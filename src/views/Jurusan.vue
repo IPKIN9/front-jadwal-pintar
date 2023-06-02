@@ -69,11 +69,12 @@
       <div class="mx-2">
         <p class="text-muted mt-2 mb-3">Harap periksa formulir anda sebelum dikirim dan disimpan.</p>
         <div class="form-group mb-3">
-          <BaseInput label="Nama Kelas" :required="true" placeholder="Masukan disini..." />
+          <BaseInput label="Nama Jurusan" :required="true" v-model="payload._jurusan" placeholder="Masukan disini..." />
         </div>
       </div>
     </template>
     <template v-slot:footer>
+      <BaseButton class="btn-primary" @event-click="upsertPayload()">Proses</BaseButton>
       <BaseButton class="btn-default" @event-click="showHideModal">Tutup</BaseButton>
     </template>
   </ModalComponent>
@@ -86,7 +87,7 @@ import BaseButton from '@/components/button/BaseButton.vue'
 import Paggination from '../components/skelton/Paggination.vue'
 import ModalComponent from '../components/modal/FormModal.vue'
 import BaseInput from '@/components/input/BaseInput.vue'
-
+import IziToast from '../utils/other/IziToast'
 
 /* Fungsi untuk mengambil data jurusan */
 const payloadList = ref()
@@ -130,6 +131,29 @@ const getPayloadList = (): void => {
     .catch((err: any) => {
       console.log(err);
     })
+}
+
+/* Fungsi untuk menambahkan data */
+interface Payload {
+  _jurusan: String
+}
+const payload = reactive({
+  _jurusan: ''
+})
+
+const upsertPayload = ():void => {
+  jurusan.upsert(payload)
+  .then((res: any) => {
+    // console.log(res.data);
+    showHideModal()
+    IziToast.successNotif({
+      title: 'Tersimpan',
+      message: 'Berhasil menyimpan data ke database'
+    })
+  })
+  .catch((err:any) => {
+    console.log(err);
+  })
 }
 
 /* Fungsi menampilkan modal */

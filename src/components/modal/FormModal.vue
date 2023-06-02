@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref } from 'vue';
+import { ref } from 'vue';
 
 const props = defineProps({
   size: {
@@ -34,8 +34,7 @@ const props = defineProps({
     type: Boolean,
     default: false
   }
-});
-
+})
 </script>
 
 <style scoped>
