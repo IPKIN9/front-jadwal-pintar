@@ -113,9 +113,8 @@ const getPayloadList = (): void => {
 }
 
 /* Fungsi menampilkan modal */
-const myModal = ref()
 const showHideModal = (): void => {
-  myModal.value.show() ? myModal.value.show() : myModal.value.hide()
+  $('#myModal').modal('show') ? $('#myModal').modal('hide') : $('#myModal').modal('show')
 }
 
 /* Fungsi untuk mengambil page baru berdasarkan paggination */
