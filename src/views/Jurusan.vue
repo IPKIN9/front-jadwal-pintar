@@ -48,8 +48,8 @@
                   <td>{{ moment(jurusan.updated_at).format('DD, MMMM YYYY') }}</td>
                   <td>
                     <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                      <BaseButton class="btn"><i class="text-primary fas fa-pencil mx-2"></i></BaseButton>
-                      <BaseButton class="btn"><i class="text-danger fas fa-trash mx-2"></i></BaseButton>
+                      <BaseButton :data-id="jurusan.id" :row-data="payloadList[index]" @event-click="editPayload" class="btn"><i class="text-primary fas fa-pencil mx-2"></i></BaseButton>
+                      <BaseButton :data-id="jurusan.id" class="btn" @event-click="deletePayload"><i class="text-danger fas fa-trash mx-2"></i></BaseButton>
                     </div>
                   </td>
                 </tr>
@@ -138,7 +138,11 @@ const getPayloadList = (): void => {
 }
 
 /* Fungsi untuk menambahkan data */
-const payload = reactive({
+interface Payload {
+  [key: string]: any;
+}
+
+const payload: Payload = reactive({
   _jurusan: ''
 })
 
@@ -174,6 +178,36 @@ const upsertPayload = async () => {
   }
 }
 
+/* Fungsi untuk mengedit data */
+const editPayload = (params: any): void => {
+  let rowData = params.rowData
+  for (const key in rowData) {
+    if (key === 'created_at' || key === 'updated_at') {
+      continue
+    }
+    payload[key] = rowData[key]
+  }
+
+  showHideModal({type: 'editedData'})
+}
+
+/* Fungsi untuk menghapus data */
+const deletePayload = (params: any): void => {
+  IziToast.confirmNotif(() => {
+    jurusan.delete(params.dataId)
+    .then((res) => {
+      IziToast.successNotif({
+        title: 'Terhapus',
+        message: 'Berhasil menyimpan dihapus'
+      })
+      getPayloadList()
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+  })
+}
+
 /* Fungsi menampilkan modal */
 const modalStatus = ref(false)
 const showHideModal = (properties: any): void => {
@@ -182,6 +216,9 @@ const showHideModal = (properties: any): void => {
   }
 
   modalStatus.value = modalStatus.value ? false : true
+  if (modalStatus.value === false) {
+    getPayloadList()
+  }
 }
 
 /* Fungsi untuk mengambil page baru berdasarkan paggination */

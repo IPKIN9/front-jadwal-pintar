@@ -11,10 +11,11 @@ const props = defineProps({
     default: "button",
   },
   dataId: Number,
+  rowData: Object
 });
 
 const emits: any = defineEmits(['eventClick'])
 const eventTriger = () => {
-  emits('eventClick', {dataId: props.dataId, buttonType: props.buttonType})
+  emits('eventClick', {dataId: props.dataId, buttonType: props.buttonType, rowData: props.rowData})
 }
 </script>
