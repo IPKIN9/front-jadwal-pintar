@@ -4,7 +4,7 @@
       <div class="card-header">
         <div class="d-flex justify-content-between">
           <h3>TABEL JURUSAN</h3>
-          <BaseButton class="btn-primary" @event-click="showHideModal">Tambah Data</BaseButton>
+          <BaseButton class="btn-primary" @event-click="showHideModal({ type: 'new-data' })">Tambah Data</BaseButton>
         </div>
       </div>
       <div class="card-body">
@@ -70,6 +70,9 @@
         <p class="text-muted mt-2 mb-3">Harap periksa formulir anda sebelum dikirim dan disimpan.</p>
         <div class="form-group mb-3">
           <BaseInput label="Nama Jurusan" :required="true" v-model="payload._jurusan" placeholder="Masukan disini..." />
+          <small class="text-danger">
+            {{ jurusanError }}
+          </small>
         </div>
       </div>
     </template>
@@ -80,7 +83,7 @@
   </ModalComponent>
 </template>
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, computed } from 'vue'
 import jurusan from '@/utils/api/jurusan'
 import moment from 'moment'
 import BaseButton from '@/components/button/BaseButton.vue'
@@ -88,6 +91,7 @@ import Paggination from '../components/skelton/Paggination.vue'
 import ModalComponent from '../components/modal/FormModal.vue'
 import BaseInput from '@/components/input/BaseInput.vue'
 import IziToast from '../utils/other/IziToast'
+import * as Yup from 'yup'
 
 /* Fungsi untuk mengambil data jurusan */
 const payloadList = ref()
@@ -134,31 +138,49 @@ const getPayloadList = (): void => {
 }
 
 /* Fungsi untuk menambahkan data */
-interface Payload {
-  _jurusan: String
-}
 const payload = reactive({
   _jurusan: ''
 })
 
-const upsertPayload = ():void => {
-  jurusan.upsert(payload)
-  .then((res: any) => {
-    // console.log(res.data);
-    showHideModal()
-    IziToast.successNotif({
-      title: 'Tersimpan',
-      message: 'Berhasil menyimpan data ke database'
+const jurusanError = ref('');
+
+const upsertPayload = async () => {
+  try {
+    const payloadSchema = Yup.object().shape({
+      _jurusan: Yup.string()
+      .required('Inputan harus diisi')
+      .min(2, 'Inputan minimal terdiri dari 2 karakter')
+      .max(150, 'Inputan maksimal terdiri dari 150 karakter'),
+    });
+
+    await payloadSchema.validate(payload, { abortEarly: false });
+
+    jurusan.upsert(payload)
+    .then((res: any) => {
+      showHideModal({ type: '' })
+      IziToast.successNotif({
+        title: 'Tersimpan',
+        message: 'Berhasil menyimpan data ke database'
+      })
     })
-  })
-  .catch((err:any) => {
-    console.log(err);
-  })
+    .catch((err: any) => {
+      console.log(err);
+    })
+
+  } catch (err: any) {
+    const errorMessages = err.inner.map((error: any) => error.message);
+
+    jurusanError.value = errorMessages.join(' | ');
+  }
 }
 
 /* Fungsi menampilkan modal */
 const modalStatus = ref(false)
-const showHideModal = (): void => {
+const showHideModal = (properties: any): void => {
+  if (properties.type === 'new-data') {
+    clearPayload()
+  }
+
   modalStatus.value = modalStatus.value ? false : true
 }
 
@@ -188,8 +210,15 @@ const sortingData = (sort: string, by: keyof SortIcon): void => {
   }
 
   getPayloadList()
-  console.log(sort);
+}
 
+/* Fungsi untuk membersihkan daftar payload */
+const clearPayload = (): void => {
+  payload._jurusan = ''
+  jurusanError.value = ''
+  if ('id' in payload) {
+    delete payload.id
+  }
 }
 
 onMounted((): void => {

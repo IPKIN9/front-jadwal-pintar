@@ -16,13 +16,15 @@
     "izitoast": "^1.4.0",
     "moment": "^2.29.4",
     "vue": "^3.3.4",
-    "vue-router": "^4.2.0"
+    "vue-router": "^4.2.0",
+    "yup": "^1.2.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",
     "@tsconfig/node18": "^2.0.1",
     "@types/jsdom": "^21.1.1",
     "@types/node": "^18.16.8",
+    "@types/vuelidate": "^0.7.18",
     "@vitejs/plugin-vue": "^4.2.3",
     "@vue/eslint-config-typescript": "^11.0.3",
     "@vue/test-utils": "^2.3.2",
