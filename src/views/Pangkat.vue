@@ -3,7 +3,7 @@
     <div class="card">
       <div class="card-header">
         <div class="d-flex justify-content-between">
-          <h3>TABEL JURUSAN</h3>
+          <h3>TABEL PANGKAT GURU</h3>
           <BaseButton class="btn-primary" @event-click="showHideModal({ type: 'new-data' })">Tambah Data</BaseButton>
         </div>
       </div>
@@ -31,8 +31,8 @@
               <thead>
                 <tr>
                   <th style="width: 5%;"><a href="#">No.</a></th>
-                  <th style="width: 41.862%;"><a @click="sortingData(meta.sort, '_jurusan')" href="#"
-                      class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon._jurusan"></i> Nama</a></th>
+                  <th style="width: 41.862%;"><a @click="sortingData(meta.sort, '_pangkat')" href="#"
+                      class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon._pangkat"></i> Nama</a></th>
                   <th style="width: 18.8881%;"><a @click="sortingData(meta.sort, 'created_at')" href="#"
                       class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon.created_at"></i> Dibuat</a>
                   </th>
@@ -41,25 +41,27 @@
                 </tr>
               </thead>
               <TransitionGroup name="table" tag="tbody">
-                <tr v-for="(jurusan, index) in payloadList" :key="index">
+
+                <tr v-for="(pangkat, index) in payloadList" :key="index">
                   <td>{{ index + 1 }}.</td>
-                  <td class="text-capitalize">{{ jurusan._jurusan }}</td>
-                  <td>{{ moment(jurusan.created_at).format('DD, MMMM YYYY') }}</td>
-                  <td>{{ moment(jurusan.updated_at).format('DD, MMMM YYYY') }}</td>
+                  <td class="text-capitalize">{{ pangkat._pangkat }}</td>
+                  <td>{{ moment(pangkat.created_at).format('DD, MMMM YYYY') }}</td>
+                  <td>{{ moment(pangkat.updated_at).format('DD, MMMM YYYY') }}</td>
                   <td>
                     <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                      <BaseButton :data-id="jurusan.id" :row-data="payloadList[index]" @event-click="editPayload"
+                      <BaseButton :data-id="pangkat.id" :row-data="payloadList[index]" @event-click="editPayload"
                         class="btn"><i class="text-primary fas fa-pencil mx-2"></i></BaseButton>
-                      <BaseButton :data-id="jurusan.id" class="btn" @event-click="deletePayload"><i
+                      <BaseButton :data-id="pangkat.id" class="btn" @event-click="deletePayload"><i
                           class="text-danger fas fa-trash mx-2"></i></BaseButton>
                     </div>
                   </td>
                 </tr>
+
               </TransitionGroup>
             </table>
             <TransitionGroup name="defend" tag="div" class="d-flex justify-content-center" >
-              <h5 class="text-muted py-3" v-if="meta.total === 0">Belum ada data dalam tabel ini!</h5>
-              <h5 class="text-muted py-3" v-if="meta.total_in_page === 0">Data tidak ditemukan!</h5>
+              <h5 class="text-muted py-3" v-if="meta.total <= 0">Belum ada data dalam tabel ini!</h5>
+              <h5 class="text-muted py-3" v-if="meta.total_in_page <= 0">Data tidak ditemukan!</h5>
             </TransitionGroup>
           </div>
           <Transition>
@@ -78,15 +80,17 @@
       <div class="mx-2">
         <p class="text-muted mt-2 mb-3">Harap periksa formulir anda sebelum dikirim dan disimpan.</p>
         <div class="form-group mb-3">
-          <BaseInput label="Nama Jurusan" :required="true" v-model="payload._jurusan" placeholder="Masukan disini..." />
+          <BaseInput label="Nama pangkat" :required="true" v-model="payload._pangkat" placeholder="Masukan disini..." />
           <small class="text-danger">
-            {{ jurusanError }}
+            {{ pangkatError }}
           </small>
         </div>
       </div>
     </template>
     <template v-slot:footer>
-      <BaseButton :disabled="loading ? true : false" class="btn-primary" @event-click="upsertPayload()">Proses <Loading v-if="loading" /></BaseButton>
+      <BaseButton :disabled="loading ? true : false" class="btn-primary" @event-click="upsertPayload()">Proses
+        <Loading v-if="loading" />
+      </BaseButton>
       <BaseButton :disabled="loading ? true : false" class="btn-default" @event-click="showHideModal">Tutup</BaseButton>
     </template>
   </ModalComponent>
@@ -135,7 +139,6 @@
 </style>
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import jurusan from '@/utils/api/jurusan'
 import moment from 'moment'
 import BaseButton from '@/components/button/BaseButton.vue'
 import Paggination from '../components/skelton/Paggination.vue'
@@ -145,14 +148,15 @@ import SweetAlert from '../utils/other/SweetAlert'
 import IziToast from '../utils/other/IziToast'
 import Loading from '@/components/other/Loading.vue'
 import * as Yup from 'yup'
+import pangkat from '@/utils/api/pangkat'
 
 const loading = ref(false)
 
-/* Fungsi untuk mengambil data jurusan */
+/* Fungsi untuk mengambil data pangkat */
 const payloadList = ref()
 
 interface SortIcon {
-  _jurusan: string,
+  _pangkat  : string,
   created_at: string
 }
 
@@ -169,7 +173,7 @@ interface Meta {
 
 const meta: Meta = reactive({
   sortIcon: {
-    _jurusan  : 'fa-sort'   ,
+    _pangkat  : 'fa-sort'   ,
     created_at: 'fa-sort-up'
   },
   search       : "",
@@ -182,13 +186,13 @@ const meta: Meta = reactive({
 })
 
 const getPayloadList = (): void => {
-  jurusan.getAll(meta)
+  pangkat.getAll(meta)
     .then((res: any) => {
       let item           = res.data
       payloadList.value  = item.data
       meta.total         = item.meta.total
       meta.page          = item.meta.page
-      meta.total_in_page = item.meta.total_in_page      
+      meta.total_in_page = item.meta.total_in_page
     })
     .catch((err: any) => {
       if (err.response) {
@@ -205,16 +209,16 @@ interface Payload {
 }
 
 const payload: Payload = reactive({
-  _jurusan: ''
+  _pangkat: ''
 })
 
-const jurusanError = ref('');
+const pangkatError = ref('');
 
 const upsertPayload = async () => {
   loading.value = true
   try {
     const payloadSchema = Yup.object().shape({
-      _jurusan: Yup.string()
+      _pangkat: Yup.string()
         .required('Inputan harus diisi')
         .min(2, 'Inputan minimal terdiri dari 2 karakter')
         .max(150, 'Inputan maksimal terdiri dari 150 karakter'),
@@ -222,7 +226,7 @@ const upsertPayload = async () => {
 
     await payloadSchema.validate(payload, { abortEarly: false });
 
-    jurusan.upsert(payload)
+    pangkat.upsert(payload)
       .then((res: any) => {
         loading.value = false
         showHideModal({ type: '' })
@@ -242,7 +246,7 @@ const upsertPayload = async () => {
   } catch (err: any) {
     const errorMessages = err.inner.map((error: any) => error.message);
 
-    jurusanError.value = errorMessages.join(' | ');
+    pangkatError.value = errorMessages.join(' | ');
   }
 }
 
@@ -262,7 +266,7 @@ const editPayload = (params: any): void => {
 /* Fungsi untuk menghapus data */
 const deletePayload = (params: any): void => {
   SweetAlert.confirmNotif(() => {
-    jurusan.delete(params.dataId)
+    pangkat.delete(params.dataId)
       .then((res) => {
         IziToast.successNotif({
           title: 'Terhapus',
@@ -315,10 +319,10 @@ const sortingData = (sort: string, by: keyof SortIcon): void => {
     meta.sortIcon[by] = 'fa-sort-down'
   }
 
-  if (by === '_jurusan') {
+  if (by === '_pangkat') {
     meta.sortIcon.created_at = 'fa-sort'
   } else if (by === 'created_at') {
-    meta.sortIcon._jurusan = 'fa-sort'
+    meta.sortIcon._pangkat = 'fa-sort'
   }
 
   getPayloadList()
@@ -326,8 +330,8 @@ const sortingData = (sort: string, by: keyof SortIcon): void => {
 
 /* Fungsi untuk membersihkan daftar payload */
 const clearPayload = (): void => {
-  payload._jurusan = ''
-  jurusanError.value = ''
+  payload._pangkat = ''
+  pangkatError.value = ''
   if ('id' in payload) {
     delete payload.id
   }
