@@ -48,8 +48,10 @@
                   <td>{{ moment(jurusan.updated_at).format('DD, MMMM YYYY') }}</td>
                   <td>
                     <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                      <BaseButton :data-id="jurusan.id" :row-data="payloadList[index]" @event-click="editPayload" class="btn"><i class="text-primary fas fa-pencil mx-2"></i></BaseButton>
-                      <BaseButton :data-id="jurusan.id" class="btn" @event-click="deletePayload"><i class="text-danger fas fa-trash mx-2"></i></BaseButton>
+                      <BaseButton :data-id="jurusan.id" :row-data="payloadList[index]" @event-click="editPayload"
+                        class="btn"><i class="text-primary fas fa-pencil mx-2"></i></BaseButton>
+                      <BaseButton :data-id="jurusan.id" class="btn" @event-click="deletePayload"><i
+                          class="text-danger fas fa-trash mx-2"></i></BaseButton>
                     </div>
                   </td>
                 </tr>
@@ -90,6 +92,7 @@ import BaseButton from '@/components/button/BaseButton.vue'
 import Paggination from '../components/skelton/Paggination.vue'
 import ModalComponent from '../components/modal/FormModal.vue'
 import BaseInput from '@/components/input/BaseInput.vue'
+import SweetAlert from '../utils/other/SweetAlert'
 import IziToast from '../utils/other/IziToast'
 import * as Yup from 'yup'
 
@@ -133,7 +136,11 @@ const getPayloadList = (): void => {
       meta.page = item.meta.page
     })
     .catch((err: any) => {
-      console.log(err);
+      if (err.response) {
+        IziToast.errorNotif(err.response.status)
+      } else {
+        IziToast.errorNotif(900)
+      }
     })
 }
 
@@ -152,24 +159,28 @@ const upsertPayload = async () => {
   try {
     const payloadSchema = Yup.object().shape({
       _jurusan: Yup.string()
-      .required('Inputan harus diisi')
-      .min(2, 'Inputan minimal terdiri dari 2 karakter')
-      .max(150, 'Inputan maksimal terdiri dari 150 karakter'),
+        .required('Inputan harus diisi')
+        .min(2, 'Inputan minimal terdiri dari 2 karakter')
+        .max(150, 'Inputan maksimal terdiri dari 150 karakter'),
     });
 
     await payloadSchema.validate(payload, { abortEarly: false });
 
     jurusan.upsert(payload)
-    .then((res: any) => {
-      showHideModal({ type: '' })
-      IziToast.successNotif({
-        title: 'Tersimpan',
-        message: 'Berhasil menyimpan data ke database'
+      .then((res: any) => {
+        showHideModal({ type: '' })
+        IziToast.successNotif({
+          title: 'Tersimpan',
+          message: 'Berhasil menyimpan data ke database'
+        })
       })
-    })
-    .catch((err: any) => {
-      console.log(err);
-    })
+      .catch((err: any) => {
+        if (err.response) {
+          IziToast.errorNotif(err.response.status)
+        } else {
+          IziToast.errorNotif(900)
+        }
+      })
 
   } catch (err: any) {
     const errorMessages = err.inner.map((error: any) => error.message);
@@ -188,12 +199,12 @@ const editPayload = (params: any): void => {
     payload[key] = rowData[key]
   }
 
-  showHideModal({type: 'editedData'})
+  showHideModal({ type: 'editedData' })
 }
 
 /* Fungsi untuk menghapus data */
 const deletePayload = (params: any): void => {
-  IziToast.confirmNotif(() => {
+  SweetAlert.confirmNotif(() => {
     jurusan.delete(params.dataId)
     .then((res) => {
       IziToast.successNotif({
@@ -203,7 +214,11 @@ const deletePayload = (params: any): void => {
       getPayloadList()
     })
     .catch((err) => {
-      console.log(err);
+      if (err.response) {
+        IziToast.errorNotif(err.response.status)
+      } else {
+        IziToast.errorNotif(900)
+      }
     })
   })
 }

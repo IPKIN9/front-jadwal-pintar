@@ -1,4 +1,5 @@
 import iziToast from 'izitoast'
+import ErroMsg from './ErroMsg';
 
 export default {
   successNotif(payload: any) {
@@ -8,30 +9,9 @@ export default {
       position: 'topRight'
     })
   },
-  confirmNotif(callback: () => void) {
-    iziToast.question({
-      timeout: 20000,
-      close: false,
-      overlay: true,
-      id: 'question',
-      backgroundColor: '#FF6969',
-      zindex: 999,
-      title: 'Hapus Data',
-      message: 'Apakah kamu yakin?',
-      position: 'center',
-      buttons: [
-        ['<button><b>YES</b></button>', function (instance, toast) {
 
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-          callback()
-
-        }, true],
-        ['<button><b>No</b></button>', function (instance, toast) {
-
-          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-
-        }, false]
-      ]
-    });
+  errorNotif(code: number) {
+    const msg = ErroMsg(code)
+    iziToast.error(msg);
   }
 }
