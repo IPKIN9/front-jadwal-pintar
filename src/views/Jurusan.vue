@@ -26,7 +26,7 @@
               </div>
             </div>
           </div>
-          <div class="dataTable-container">
+          <div class="dataTable-container mt-3">
             <table class="table" id="table1">
               <thead>
                 <tr>
@@ -57,6 +57,9 @@
                 </tr>
               </tbody>
             </table>
+            <div class="d-flex justify-content-center py-3" v-if="meta.total <= 0">
+              <h5 class="text-muted">Belum ada data dalam tabel ini!</h5>
+            </div>
           </div>
           <Paggination :page="meta.page" :total="meta.total" :limit="meta.limit" @event-click="paggination" />
         </div>
@@ -79,13 +82,13 @@
       </div>
     </template>
     <template v-slot:footer>
-      <BaseButton class="btn-primary" @event-click="upsertPayload()">Proses</BaseButton>
-      <BaseButton class="btn-default" @event-click="showHideModal">Tutup</BaseButton>
+      <BaseButton :disabled="loading ? true : false" class="btn-primary" @event-click="upsertPayload()">Proses <Loading v-if="loading" /></BaseButton>
+      <BaseButton :disabled="loading ? true : false" class="btn-default" @event-click="showHideModal">Tutup</BaseButton>
     </template>
   </ModalComponent>
 </template>
 <script setup lang="ts">
-import { onMounted, reactive, ref, computed } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import jurusan from '@/utils/api/jurusan'
 import moment from 'moment'
 import BaseButton from '@/components/button/BaseButton.vue'
@@ -94,7 +97,10 @@ import ModalComponent from '../components/modal/FormModal.vue'
 import BaseInput from '@/components/input/BaseInput.vue'
 import SweetAlert from '../utils/other/SweetAlert'
 import IziToast from '../utils/other/IziToast'
+import Loading from '@/components/other/Loading.vue'
 import * as Yup from 'yup'
+
+const loading = ref(false)
 
 /* Fungsi untuk mengambil data jurusan */
 const payloadList = ref()
@@ -156,6 +162,7 @@ const payload: Payload = reactive({
 const jurusanError = ref('');
 
 const upsertPayload = async () => {
+  loading.value = true
   try {
     const payloadSchema = Yup.object().shape({
       _jurusan: Yup.string()
@@ -168,6 +175,7 @@ const upsertPayload = async () => {
 
     jurusan.upsert(payload)
       .then((res: any) => {
+        loading.value = false
         showHideModal({ type: '' })
         IziToast.successNotif({
           title: 'Tersimpan',
@@ -206,20 +214,20 @@ const editPayload = (params: any): void => {
 const deletePayload = (params: any): void => {
   SweetAlert.confirmNotif(() => {
     jurusan.delete(params.dataId)
-    .then((res) => {
-      IziToast.successNotif({
-        title: 'Terhapus',
-        message: 'Berhasil menyimpan dihapus'
+      .then((res) => {
+        IziToast.successNotif({
+          title: 'Terhapus',
+          message: 'Berhasil menyimpan dihapus'
+        })
+        getPayloadList()
       })
-      getPayloadList()
-    })
-    .catch((err) => {
-      if (err.response) {
-        IziToast.errorNotif(err.response.status)
-      } else {
-        IziToast.errorNotif(900)
-      }
-    })
+      .catch((err) => {
+        if (err.response) {
+          IziToast.errorNotif(err.response.status)
+        } else {
+          IziToast.errorNotif(900)
+        }
+      })
   })
 }
 
