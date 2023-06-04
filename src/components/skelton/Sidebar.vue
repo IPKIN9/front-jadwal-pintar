@@ -21,13 +21,16 @@
           </router-link>
         </li>
 
-        <li class="sidebar-item has-sub" :class="$route.name === 'jurusan' ? 'active' : ''">
+        <li class="sidebar-item has-sub" :class="$route.name === 'jurusan' || $route.name === 'pangkat' ? 'active' : ''">
           <a href="#" class="sidebar-link">
             <i class="bi bi-stack"></i>
             <span>Data Master</span>
           </a>
-          <ul class="submenu" style="display: none">
-            <li class="submenu-item">
+          <ul class="submenu" :class="$route.name === 'jurusan' || $route.name === 'pangkat' ? 'active' : ''">
+            <li class="submenu-item" :class="$route.name === 'pangkat' ? 'active' : ''">
+              <router-link href="#" :to="{name: 'pangkat'}">Pangkat Guru</router-link>
+            </li>
+            <li class="submenu-item" :class="$route.name === 'jurusan' ? 'active' : ''">
               <router-link href="#" :to="{name: 'jurusan'}">Jurusan</router-link>
             </li>
           </ul>
