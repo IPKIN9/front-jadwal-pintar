@@ -63,7 +63,7 @@
             </TransitionGroup>
           </div>
           <Transition>
-            <Paggination v-show="meta.search.length <= 0" :page="meta.page" :total="meta.total" :limit="meta.limit"
+            <Paggination v-show="meta.search.length <= 0 && meta.total > meta.limit" :page="meta.page" :total="meta.total" :limit="meta.limit"
               @event-click="paggination" />
           </Transition>
         </div>
