@@ -21,12 +21,12 @@
           </router-link>
         </li>
 
-        <li class="sidebar-item has-sub" :class="$route.name === 'jurusan' || $route.name === 'pangkat' || $route.name === 'mapel' ? 'active' : ''">
+        <li class="sidebar-item has-sub" :class="$route.name === 'jurusan' || $route.name === 'pangkat' || $route.name === 'mapel' || $route.name === 'kelas' ? 'active' : ''">
           <a href="#" class="sidebar-link">
             <i class="bi bi-stack"></i>
             <span>Data Master</span>
           </a>
-          <ul class="submenu" :class="$route.name === 'jurusan' || $route.name === 'pangkat' || $route.name === 'mapel' ? 'active' : ''">
+          <ul class="submenu" :class="$route.name === 'jurusan' || $route.name === 'pangkat' || $route.name === 'mapel' || $route.name === 'kelas' ? 'active' : ''">
             <li class="submenu-item" :class="$route.name === 'pangkat' ? 'active' : ''">
               <router-link href="#" :to="{name: 'pangkat'}">Pangkat Guru</router-link>
             </li>
@@ -35,6 +35,9 @@
             </li>
             <li class="submenu-item" :class="$route.name === 'mapel' ? 'active' : ''">
               <router-link href="#" :to="{name: 'mapel'}">Mata Pelajaran</router-link>
+            </li>
+            <li class="submenu-item" :class="$route.name === 'kelas' ? 'active' : ''">
+              <router-link href="#" :to="{name: 'kelas'}">Kelas</router-link>
             </li>
           </ul>
         </li>
