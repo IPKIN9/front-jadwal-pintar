@@ -48,7 +48,7 @@ const props = defineProps({
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* Adjust the z-index value as needed */
+  z-index: 9999;
   transition: opacity 0.3s;
 }
 
@@ -71,8 +71,11 @@ const props = defineProps({
   max-width: 90%;
   box-sizing: border-box;
   position: absolute;
-  top: 30%;
-  transform: translateY(-50%); /* Adjust the value as needed */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 95%;
+  overflow-y: auto;
 }
 
 .modal-enter-active,
@@ -104,7 +107,11 @@ const props = defineProps({
 }
 
 .modal-lg {
-  width: 800px;
+  width: 900px;
+}
+
+.modal-xl {
+  width: 1500px;
 }
 
 .modal-header {
@@ -125,4 +132,5 @@ const props = defineProps({
   text-align: right;
   border-top: 1px solid #ddd;
 }
+
 </style>
