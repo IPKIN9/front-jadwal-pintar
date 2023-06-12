@@ -5,6 +5,7 @@ import Pangkat from '../views/Pangkat.vue'
 import Mapel from '../views/Mapel.vue'
 import Kelas from '../views/Kelas.vue'
 import Guru from '@/views/Guru.vue'
+import Jadwal from '@/views/Jadwal.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,6 +39,11 @@ const router = createRouter({
       path: '/guru',
       name: 'guru',
       component: Guru
+    },
+    {
+      path: '/jadwal',
+      name: 'jadwal',
+      component: Jadwal
     },
   ]
 })
