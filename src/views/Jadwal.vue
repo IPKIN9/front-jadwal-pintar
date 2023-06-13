@@ -38,9 +38,9 @@
               </tr>
             </thead>
             <tbody>
-              <TransitionGroup name="calendar" tag="tr" v-for="(week, index) in newDates" :key="index">
-                <TransitionGroup name="day" tag="td" class="cs-td" v-for="(day, index2) in week" :key="index2">
-                  <div :class="
+              <tr v-for="(week, index) in newDates" :key="index">
+                <td class="cs-td" v-for="(day, index2) in week" :key="index2" >
+                  <a href="#" role="button" @click="showHideModal({date:`${day.tgl} ${getMonthName(day.bulan)} ${day.tahun}`, type: 'new'})" :class="
                     (day.bulan === (datePayload.bulan - 1) && day.bulan !== 12) || 
                     (day.bulan === (datePayload.bulan + 1) && day.bulan !== 12) ||
                     ((datePayload.bulan === 12 && (day.bulan === 1 || day.bulan === 11)) || (datePayload.bulan === 1 && (day.bulan === 12) || day.bulan === 2))? 'disabled' : ''">
@@ -71,15 +71,68 @@
                         <div class="d-flex"><small class="px-2 py-2 rounded-3 text-muted">set sekarang</small></div>
                       </div>
                     </div>
-                  </div>
-                </TransitionGroup>
-              </TransitionGroup>
+                  </a>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
   </section>
+  <ModalComponent size="modal-lg" :is-modal-open="modalStatus" @close="showHideModal" ref="modal">
+    <template v-slot:header>
+      <h4 class="tex-center"><i class="fa-solid fa-file-invoice me-2 text-capitalize"></i> Jadwal Hari Ini - {{ dateNow }}</h4>
+    </template>
+    <template v-slot:body>
+      <div class="row px-2">
+        <div class="col-lg-6">
+          <div class="mb-3"><p>Pastikan semua data terisi sebelum melakukan proses</p></div>
+        </div>
+        <div class="col-lg-6">
+          <span class="d-flex justify-content-end"><small>RPL 1</small><small class="text-muted ms-2">:KELAS</small></span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="form-group mt-2 mb-3 mx-2">
+            <SelectSearch size="5" @search-event="getMapelList" @clear-data="clearMapel" :list="mapelList" :show-up="mapelShow" label="Mata Pelajaran" :required="true" v-model.number="schedulePayload.mapel" />
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="form-group mt-2 mb-3 mx-2">
+            <SelectSearch size="5" @search-event="getGuruList" @clear-data="clearGuru" :list="guruList" :show-up="guruShow" label="Guru" :required="true" v-model.number="schedulePayload.guru_id" />
+          </div>
+        </div>
+      </div>
+      <div class="row mt-5">
+        <BaseButton class="col-lg ms-4 me-3 btn-info">TAMBAH KE SESI 1</BaseButton>
+        <BaseButton class="col-lg me-4 ms-4 btn-success">TAMBAH KE SESI 2</BaseButton>
+      </div>
+      <div class="row mt-5">
+        <span class="col-lg-6 text-center">GURU</span>
+        <span class="col-lg-6 text-center">MATA PELAJARAN</span>
+        <div class="divider col-lg-12">
+          <div class="divider-text">07:00 - 11:00</div>
+        </div>
+        <div class="row">
+          <div class="col-lg-6 text-center"><h5><i class="fa-solid fa-user me-2 text-muted"></i> Irwandi Paputungan S.Kom</h5></div>
+          <div class="col-lg-6 text-center"><h5>Matematika</h5></div>
+        </div>
+        <div class="divider col-lg-12">
+          <div class="divider-text">11:16 - 16:00</div>
+        </div>
+        <div class="row">
+          <div class="col-lg-6 text-center"><h5><i class="fa-solid fa-user me-2 text-muted"></i> Dirga Andika S.Kom</h5></div>
+          <div class="col-lg-6 text-center"><h5>Bahasa Indonesia</h5></div>
+        </div>
+      </div>
+    </template>
+    <template v-slot:footer>
+      <BaseButton :disabled="loading ? true : false" class="btn-primary">Proses <Loading v-if="loading" /></BaseButton>
+      <BaseButton :disabled="loading ? true : false" class="btn-default" @event-click="showHideModal">Tutup</BaseButton>
+    </template>
+  </ModalComponent>
 </template>
 <style>
   .cs-th {
@@ -145,6 +198,14 @@ import SelectSearch from '@/components/input/SelectSearch.vue';
 import { onMounted, reactive, ref } from 'vue';
 import detailJadwal from '../utils/api/detail-jadwal'
 import Calendar from '../utils/other/Calendar'
+import ModalComponent from '@/components/modal/FormModal.vue';
+import Loading from '@/components/other/Loading.vue'
+import BaseButton from '@/components/button/BaseButton.vue';
+import { number } from 'yup';
+import guru from '@/utils/api/guru';
+import mapel from '@/utils/api/mapel';
+
+const loading = ref(false)
 
 /* Fungsi untuk mengambil data dari detail jadwal */
 interface ScheduleMeta {
@@ -175,6 +236,77 @@ const getSchedule = async () => {
     console.log(err);
     
   })
+}
+
+/* Fungsi tambah edit data */
+interface SchedulePayload {
+  [key: string]: any;
+}
+
+const schedulePayload: SchedulePayload = reactive({
+  jadwal_id: 0,
+  guru_id: 0,
+  mapel: '',
+  jumlah_jam: 5,
+  tgl: '',
+  jam_masuk: '',
+  jam_keluar: ''
+})
+
+/* Fungsi mengambil data guru */
+const guruList = ref<[]>()
+
+const guruShow: {key:string, name: string} = {
+  key: 'id',
+  name: 'nama'
+}
+const getGuruList = (guruPayload: string) => {
+  guru.getAll({
+    search : guruPayload,
+    page   : 1,
+    limit  : 100,
+    orderBy: 'nama',
+    sort   : 'asc',
+  })
+  .then((res) => {
+    guruList.value = res.data.data
+  })
+  .catch((err) => {
+    console.log(err);
+    
+  })
+}
+
+const clearGuru = (): void => {
+  mapelList.value = []
+}
+
+/* Fungsi mengambil data matapelajaran */
+const mapelList = ref<[]>()
+
+const mapelShow: {key:string, name: string} = {
+  key: 'nama_mapel',
+  name: 'nama_mapel'
+}
+const getMapelList = (mapelPayload: string) => {
+  mapel.getAll({
+    search : mapelPayload,
+    page   : 1,
+    limit  : 100,
+    orderBy: 'nama_mapel',
+    sort   : 'asc',
+  })
+  .then((res) => {
+    mapelList.value = res.data.data
+  })
+  .catch((err) => {
+    console.log(err);
+    
+  })
+}
+
+const clearMapel = (): void => {
+  mapelList.value = []
 }
 
 /* Fungsi lainnya */
@@ -223,8 +355,8 @@ const pushScheduleToCalendar = (params: any): void => {
 
 const newDates = ref<DateObject[][]>([]);
 
-const bulan: object[] = [
-  {lable: 'january'  , val: 1 },
+const bulan = [
+  {lable: 'januari'  , val: 1 },
   {lable: 'februari' , val: 2 },
   {lable: 'maret'    , val: 3 },
   {lable: 'april'    , val: 4 },
@@ -238,12 +370,32 @@ const bulan: object[] = [
   {lable: 'desember' , val: 12}
 ]
 
+const getMonthName = (monthVal: number) => {
+  const month = bulan.find(item => item.val === monthVal);
+
+  if (month) {
+    return month.lable;
+  } else {
+    return 'bulan tidak ditemukan'
+  }
+}
+
 interface DateObject {
   hari : string;
   tgl  : number;
   bulan: number;
   tahun: number;
   data : any[]
+}
+
+const dateNow = ref<string>('')
+
+const modalStatus = ref(false)
+const showHideModal = (properties: any): void => {
+  modalStatus.value = modalStatus.value ? false : true
+  if (properties.type === 'new') {
+    dateNow.value = properties.date
+  }
 }
 
 // const  speakerInitials = (speaker:string) => {
