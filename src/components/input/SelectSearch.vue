@@ -1,15 +1,15 @@
 <template>
   <label class="from-label">{{ label }} <small v-if="required" class="text-danger">*</small></label>
   <div class="form-group mb-2 position-relative has-icon-right">
-    <input v-bind="$attrs" @focusin="getWidth()" id="input-search" type="text" class="form-control"
+    <input v-bind="$attrs" @focusin="getWidth()" :id="idElement.search" type="text" class="form-control"
       placeholder="---Cari disini---" v-model="searchPayload" @keyup="searchData()" @focus="searchData()"
       autocomplete="off">
       <div v-show="list.length >= 1 || searchPayload.length >= 1" class="form-control-icon">
           <a role="button" @click="clearInput()" class="fa-solid fa-xmark text-danger"></a>
       </div>
   </div>
-  <TransitionGroup id="select-search" name="selectsearch" tag="select" v-show="list.length >= 1 && showList"
-    class="form-select" v-bind="$attrs" @input="handleInput($event)" :value="modelValue">
+  <TransitionGroup :id="idElement.select" name="selectsearch" tag="select" v-show="list.length >= 1 && showList"
+    class="form-select select-search" v-bind="$attrs" @input="handleInput($event)" :value="modelValue">
     <option v-for="(ls, index) in list" :key="index" :value="ls[showUp.key]" class="text-capitalize"
       @click="setNameValue(ls[showUp.name])">{{ ls[showUp.name] }}</option>
   </TransitionGroup>
@@ -33,7 +33,7 @@
   overflow: hidden;
 }
 
-#select-search {
+.select-search {
   position: absolute;
 }
 </style>
@@ -60,14 +60,18 @@ const props = defineProps({
   required  : {
     type      : Boolean,
     default   : false
+  },
+  idElement: {
+    type   : Object,
+    default: {}
   }
 })
 
 const emits = defineEmits(['searchEvent', 'update:modelValue', 'clearData', 'setName'])
 
 const getWidth = async () => {
-  let width: any = document.getElementById('input-search')?.offsetWidth
-  let selectSearch = document.getElementById('select-search') as HTMLInputElement
+  let width: any = document.getElementById(props.idElement.search)?.offsetWidth
+  let selectSearch = document.getElementById(props.idElement.select) as HTMLInputElement
   selectSearch.style.width = `${width}px`
 
   showList.value = true

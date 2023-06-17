@@ -13,5 +13,5 @@ export default {
   errorNotif(code: number) {
     const msg = ErroMsg(code)
     iziToast.error(msg);
-  }
+  },
 }

@@ -1,12 +1,17 @@
 <template>
   <label class="from-label">{{ label }} <small v-if="required" class="text-danger">*</small></label>
-  <div class="input-group mb-3">
-    <span class="input-group-text" id="basic-addon1"><i class="bi bi-search"></i></span>
-    <input type="text" class="form-control" placeholder="---Cari disini---" v-model="searchPayload" @keyup="searchData()" @focus="searchData()">
+  <div class="form-group mb-2 position-relative has-icon-right">
+    <input :id="idElement.search" @click="getWidth" type="text" class="form-control" placeholder="---Cari disini---" 
+    v-model="searchPayload" @keyup="searchData()" @focus="searchData()" autocomplete="off">
+    <div v-show="list.length >= 1 || searchPayload.length >= 1" class="form-control-icon">
+      <a role="button" @click="clearInput()" class="fa-solid fa-xmark text-danger"></a>
+    </div>
   </div>
- <TransitionGroup name="selectsearch" tag="select" v-show="list.length >= 1" class="form-select" v-bind="$attrs"  @input="handleInput($event)" :value="modelValue">
-    <option v-for="(ls, index) in list" :key="index" :value="ls[showUp.key]" :class="checkDataExists(ls[showUp.key], formatDate(tgl)) ? 'hidden' : ''" class="text-capitalize">{{ ls[showUp.name] }}</option>
- </TransitionGroup>
+  <TransitionGroup :id="idElement.select" name="selectsearch" tag="select" v-show="list.length >= 1 && showList" class="form-select select-search" v-bind="$attrs"  @input="handleInput($event)" :value="modelValue">
+      <option v-for="(ls, index) in list" :key="index" :value="ls[showUp.key]" 
+      :class="checkDataExists(ls[showUp.key], formatDate(tgl)) ? 'text-muted' : ''" class="text-capitalize"
+      @click="() => {setNameValue(ls[showUp.name]); checkVisibilityButton(ls[showUp.key], formatDate(tgl))}">{{ ls[showUp.name] }}</option>
+  </TransitionGroup>
 </template>
 <style>
 .selectsearch-enter-active {
@@ -26,12 +31,17 @@
 .selectsearch {
   overflow: hidden;
 }
+
 .hidden {
   display: none;
 }
+
+.select-search {
+  position: absolute;
+}
 </style>
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { reactive, ref } from 'vue';
 
 const props = defineProps({
   label: {
@@ -62,12 +72,24 @@ const props = defineProps({
   required: {
     type   : Boolean,
     default: false
+  },
+  idElement: {
+    type   : Object,
+    default: {}
   }
 })
 
-const emits = defineEmits(['searchEvent', 'update:modelValue', 'clearData'])
+const emits = defineEmits(['searchEvent', 'update:modelValue', 'clearData', 'setName', 'visibleButton'])
 
 const searchPayload = ref('')
+
+const getWidth = async () => {
+  let width: any = document.getElementById(props.idElement.search)?.offsetWidth
+  let selectSearch = document.getElementById(props.idElement.select) as HTMLInputElement
+  selectSearch.style.width = `${width}px`
+
+  showList.value = true
+};
 
 const searchData = (): void => {
   emits('searchEvent', searchPayload.value)
@@ -83,7 +105,8 @@ const handleInput = (event: Event) => {
 const checkDataExists = (id: number, tgl: string):boolean => {
   // return props.listSchedule.some((item: { guru_id: number }) => item.guru_id === id);
   const filteredData = props.listSchedule.filter((item: { guru_id: number; tgl: string }) => item.guru_id === id && item.tgl === tgl);
-  return filteredData.length === 2;
+
+  return filteredData.length;
 }
 
 const formatDate = (date: string): string => {
@@ -93,9 +116,39 @@ const formatDate = (date: string): string => {
   return `${year}-${formattedMonth}-${formattedDay}`;
 }
 
-const delList = (): void => {
-  if (!props.modelValue) {
-    emits('clearData')
-  }
+const showList = ref<boolean>(false)
+
+const setNameValue = (name: string) => {
+  searchPayload.value = name
+  emits('setName')
+
+  showList.value = false
 }
+
+const checkVisibilityButton = (id: number, tgl: string) => {
+  const filteredData = props.listSchedule.filter((item: { guru_id: number; tgl: string }) => item.guru_id === id && item.tgl === tgl);
+  for (const item of filteredData) {
+    if (item.jam_masuk === "07:15:00") {
+      visibleButton.sesi1 = false
+    }
+    if (item.jam_masuk === "11:16:00") {
+      visibleButton.sesi2 = false
+    }
+  }
+
+  emits('visibleButton', visibleButton)
+}
+
+const clearInput = () => {
+  emits('clearData')
+  showList.value = false
+  searchPayload.value = ''
+  visibleButton.sesi1 = true
+  visibleButton.sesi2 = true
+}
+
+const visibleButton = reactive({
+  sesi1: true,
+  sesi2: true
+})
 </script>
