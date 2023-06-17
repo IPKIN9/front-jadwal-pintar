@@ -9,15 +9,14 @@
           <div class="input-group">
           </div>
           <div class="input-group row ms-1">
-            <p class="col-lg"><i class="fa-solid fa-user me-1"></i> User: ADMIN</p>
-            <p class="col-lg"><i class="fa-solid fa-barcode me-1"></i> Code Jadwal: 19003</p>
+            <p class="col-lg text-end"><i class="fa-solid fa-user me-1"></i> User: ADMIN</p>
           </div>
         </div>
       </div>
       <div class="card-body">
         <div class="row mt-3">
           <div class="col-lg-4">
-            <SelectSearch label="Pilih Kelas" class="rounded-3" />
+            <SelectSearch @change="getCalendar" @setName="clearKelas" size="5" @search-event="getKelasPayload" @clear-data="clearKelas" :required="true" :list="kelasList" :show-up="kelasShow" v-model.number="scheduleMeta.kelas_id" label="Pilih Kelas" class="rounded-3" />
           </div>
           <div class="col-lg-4">
             <BaseSelect @change="getCalendar()" label="Bulan" :list="bulan" v-model.number="datePayload.bulan" />
@@ -26,7 +25,7 @@
             <BaseSelect label="Tahun" />
           </div>
         </div>
-        <div class="mt-5">
+        <div class="mt-5" v-show="scheduleMeta.kelas_id !== 0">
           <table class="table table-bordered mb-0">
             <thead>
               <tr>
@@ -40,10 +39,11 @@
             <tbody>
               <tr v-for="(week, index) in newDates" :key="index">
                 <td class="cs-td" v-for="(day, index2) in week" :key="index2" >
-                  <a href="#" role="button" @click="showHideModal({date:`${day.tgl} ${getMonthName(day.bulan)} ${day.tahun}`, type: 'new'})" :class="
+                  <a href="#" role="button" @click="getDetail({show:`${day.tgl} ${getMonthName(day.bulan)} ${day.tahun}`, val:`${day.tahun}-${day.bulan}-${day.tgl}`, type: 'new'}, {data: day.data})" :class="
                     (day.bulan === (datePayload.bulan - 1) && day.bulan !== 12) || 
                     (day.bulan === (datePayload.bulan + 1) && day.bulan !== 12) ||
-                    ((datePayload.bulan === 12 && (day.bulan === 1 || day.bulan === 11)) || (datePayload.bulan === 1 && (day.bulan === 12) || day.bulan === 2))? 'disabled' : ''">
+                    ((datePayload.bulan === 12 && (day.bulan === 1 || day.bulan === 11)) || 
+                    (datePayload.bulan === 1 && (day.bulan === 12) || day.bulan === 2))? 'disabled' : ''">
                     <div class="px-2 pt-2 row">
                       <div class="col-lg-3">
                         <h3>{{ day.tgl }}</h3>
@@ -82,7 +82,7 @@
   </section>
   <ModalComponent size="modal-lg" :is-modal-open="modalStatus" @close="showHideModal" ref="modal">
     <template v-slot:header>
-      <h4 class="tex-center"><i class="fa-solid fa-file-invoice me-2 text-capitalize"></i> Jadwal Hari Ini - {{ dateNow }}</h4>
+      <h4 class="tex-center"><i class="fa-solid fa-file-invoice me-2 text-capitalize"></i> Jadwal Hari Ini - {{ dateNow.show }}</h4>
     </template>
     <template v-slot:body>
       <div class="row px-2">
@@ -101,35 +101,43 @@
         </div>
         <div class="col-lg-6">
           <div class="form-group mt-2 mb-3 mx-2">
-            <SelectSearch size="5" @search-event="getGuruList" @clear-data="clearGuru" :list="guruList" :show-up="guruShow" label="Guru" :required="true" v-model.number="schedulePayload.guru_id" />
+            <BaseSelectSchedule size="5" :tgl="dateNow.val" :list-schedule="allScheduleList" @search-event="getGuruList" @clear-data="clearGuru" :list="guruList" :show-up="guruShow" label="Guru" :required="true" v-model.number="schedulePayload.guru_id" />
           </div>
         </div>
       </div>
-      <div class="row mt-5">
-        <BaseButton class="col-lg ms-4 me-3 btn-info">TAMBAH KE SESI 1</BaseButton>
-        <BaseButton class="col-lg me-4 ms-4 btn-success">TAMBAH KE SESI 2</BaseButton>
+      <div class="row my-3">
+        <div v-if="!checkJamMasuk('07:00:00')" class="col-lg-6 mb-5 text-center"><BaseButton class="btn-info px-5">TAMBAHKAN KE SESI 1</BaseButton></div>
+        <div v-if="!checkJamMasuk('11:16:00')" class="col-lg-6 mb-5 text-center"><BaseButton class="btn-primary px-5">TAMBAHKAN KE SESI 2</BaseButton></div>
       </div>
-      <div class="row mt-5">
-        <span class="col-lg-6 text-center">GURU</span>
-        <span class="col-lg-6 text-center">MATA PELAJARAN</span>
-        <div class="divider col-lg-12">
-          <div class="divider-text">07:00 - 11:00</div>
+      <div class="row mt-3">
+        <span class="col-lg-6 text-start"><p class="ms-4">GURU / MATA PELAJARAN</p></span>
+        <span class="col-lg-6 text-end"><p class="me-4">AKSI</p></span>
+        <div v-if="detailPayload.length <= 0" class="d-flex justify-content-center">
+          <p class="text-muted my-5 text-uppercase">Data Belum Diset</p>
         </div>
-        <div class="row">
-          <div class="col-lg-6 text-center"><h5><i class="fa-solid fa-user me-2 text-muted"></i> Irwandi Paputungan S.Kom</h5></div>
-          <div class="col-lg-6 text-center"><h5>Matematika</h5></div>
-        </div>
-        <div class="divider col-lg-12">
-          <div class="divider-text">11:16 - 16:00</div>
-        </div>
-        <div class="row">
-          <div class="col-lg-6 text-center"><h5><i class="fa-solid fa-user me-2 text-muted"></i> Dirga Andika S.Kom</h5></div>
-          <div class="col-lg-6 text-center"><h5>Bahasa Indonesia</h5></div>
+        <div v-for="(detail, index) in detailPayload" :key="index">
+          <div class="divider col-lg-12">
+            <div class="divider-text">{{ detail.jam_masuk }} - {{ detail.jam_keluar }}</div>
+          </div>
+          <div class="row">
+            <div class="col-lg-6 text-start">
+            <div class="ms-4">
+              <p class="mb-1"><i class="fa-solid fa-user me-2 text-muted"></i> {{ detail.guru }} </p>
+              <span class="fs-5 fw-bold text-uppercase"> {{ detail.mapel }}</span>
+            </div>
+            </div>
+            <div class="col-lg-6 text-end">
+              <div class="btn-group" role="group" aria-label="Basic example">
+                  <BaseButton @event-click="insertSchedule('07:00:00', '11:15:00')" class="btn-default">Edit</BaseButton>
+                  <BaseButton class="btn-default">Hapus</BaseButton>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </template>
     <template v-slot:footer>
-      <BaseButton :disabled="loading ? true : false" class="btn-primary">Proses <Loading v-if="loading" /></BaseButton>
+      <!-- <BaseButton @event-click="insertSchedule" :disabled="loading ? true : false" class="btn-primary">Proses <Loading v-if="loading" /></BaseButton> -->
       <BaseButton :disabled="loading ? true : false" class="btn-default" @event-click="showHideModal">Tutup</BaseButton>
     </template>
   </ModalComponent>
@@ -199,38 +207,56 @@ import { onMounted, reactive, ref } from 'vue';
 import detailJadwal from '../utils/api/detail-jadwal'
 import Calendar from '../utils/other/Calendar'
 import ModalComponent from '@/components/modal/FormModal.vue';
-import Loading from '@/components/other/Loading.vue'
 import BaseButton from '@/components/button/BaseButton.vue';
-import { number } from 'yup';
 import guru from '@/utils/api/guru';
 import mapel from '@/utils/api/mapel';
+import BaseSelectSchedule from '../components/input/BaseSelectSchedule.vue'
+import kelas from '@/utils/api/kelas';
 
 const loading = ref(false)
 
 /* Fungsi untuk mengambil data dari detail jadwal */
 interface ScheduleMeta {
-  jadwal_id : number
+  kelas_id : number
   start_date: string
   end_date  : string
 }
 
 const scheduleMeta: ScheduleMeta = reactive({
-  jadwal_id : 1,
+  kelas_id : 0,
+  start_date: '',
+  end_date  : ''
+})
+
+const scheduleMeta2 = reactive({
+  kelas_id : null,
   start_date: '',
   end_date  : ''
 })
 
 const scheduleList = ref<any[]>()
+const allScheduleList = ref<any[]>()
 
 const getSchedule = async () => {
   await detailJadwal.getAll(scheduleMeta)
   .then((res) => {
     let data = res.data.data
     scheduleList.value = data
-
     for (const key in data) {
       pushScheduleToCalendar(data[key])
     }
+  })
+  .catch((err) => {
+    console.log(err);
+    
+  })
+}
+
+const getAllSchedule = async () => {
+  await detailJadwal.getAll(scheduleMeta2)
+  .then((res) => {
+    let data = res.data.data
+    allScheduleList.value = data
   })
   .catch((err) => {
     console.log(err);
@@ -244,7 +270,7 @@ interface SchedulePayload {
 }
 
 const schedulePayload: SchedulePayload = reactive({
-  jadwal_id: 0,
+  kelas_id: 0,
   guru_id: 0,
   mapel: '',
   jumlah_jam: 5,
@@ -252,6 +278,41 @@ const schedulePayload: SchedulePayload = reactive({
   jam_masuk: '',
   jam_keluar: ''
 })
+
+const insertSchedule = (jam_masuk: string, jam_keluar: string): void => {
+  schedulePayload.jam_masuk = jam_masuk
+  schedulePayload.jam_keluar = jam_keluar
+  schedulePayload.tgl = dateNow.val
+  console.log(schedulePayload);
+}
+
+/* Fungsi untuk mengambil data kelas */
+const kelasList = ref<[]>()
+const kelasShow: {key:string, name: string} = {
+  key: 'id',
+  name: '_kelas'
+}
+
+const getKelasPayload = (kelasPayload: any): void => {
+  kelas.getAll({
+    search: kelasPayload,
+    limit: 50,
+    page: 1,
+    orderBy: '_kelas',
+    sort: 'asc'
+  })
+  .then((res) => {
+    kelasList.value = res.data.data
+  })
+  .catch((err) => {
+    console.log(err);
+    
+  })
+}
+
+const clearKelas = (): void => {
+  kelasList.value = []
+}
 
 /* Fungsi mengambil data guru */
 const guruList = ref<[]>()
@@ -309,6 +370,33 @@ const clearMapel = (): void => {
   mapelList.value = []
 }
 
+/* Detail schedule */
+interface DetailItem {
+  id: number;
+  kode: string;
+  kelas_id: number;
+  guru: string;
+  guru_id: number;
+  mapel: string;
+  jumlah_jam: number;
+  tgl: string;
+  jam_masuk: string;
+  jam_keluar: string;
+  created_at: string;
+  updated_at: string;
+}
+
+const detailPayload = ref<any>()
+
+const checkJamMasuk = (timeNow: string): boolean => {
+  return detailPayload.value.some((item: DetailItem) => item.jam_masuk === timeNow);
+}
+
+const getDetail = (params: any, data: any): void => {
+  showHideModal(params)
+  detailPayload.value = data.data
+}
+
 /* Fungsi lainnya */
 interface DatePayload {
   bulan: number
@@ -332,7 +420,11 @@ const getCalendar = (): void => {
   scheduleMeta.start_date = start_date
   scheduleMeta.end_date   = end_date
 
+  scheduleMeta2.start_date = start_date
+  scheduleMeta2.end_date   = end_date
+
   getSchedule()
+  getAllSchedule()
 }
 
 const pushScheduleToCalendar = (params: any): void => {
@@ -388,13 +480,17 @@ interface DateObject {
   data : any[]
 }
 
-const dateNow = ref<string>('')
+const dateNow: any = reactive({
+  show: '',
+  val : ''
+})
 
 const modalStatus = ref(false)
 const showHideModal = (properties: any): void => {
   modalStatus.value = modalStatus.value ? false : true
   if (properties.type === 'new') {
-    dateNow.value = properties.date
+    dateNow.show = properties.show
+    dateNow.val  = properties.val
   }
 }
 

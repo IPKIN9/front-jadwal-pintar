@@ -5,7 +5,7 @@
     <input type="text" class="form-control" placeholder="---Cari disini---" v-model="searchPayload" @keyup="searchData()" @focus="searchData()">
   </div>
  <TransitionGroup name="selectsearch" tag="select" v-show="list.length >= 1" class="form-select" v-bind="$attrs"  @input="handleInput($event)" :value="modelValue">
-    <option v-for="(ls, index) in list" :key="index" :value="ls[showUp.key]" class="text-capitalize" @click="setNameValue(ls[showUp.name])">{{ ls[showUp.name] }}</option>
+    <option v-for="(ls, index) in list" :key="index" :value="ls[showUp.key]" :class="checkDataExists(ls[showUp.key], formatDate(tgl)) ? 'hidden' : ''" class="text-capitalize">{{ ls[showUp.name] }}</option>
  </TransitionGroup>
 </template>
 <style>
@@ -26,9 +26,12 @@
 .selectsearch {
   overflow: hidden;
 }
+.hidden {
+  display: none;
+}
 </style>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
   label: {
@@ -39,6 +42,10 @@ const props = defineProps({
     type   : [Object, Array],
     default: []
   },
+  listSchedule: {
+    type   : [Object, Array],
+    default: []
+  },
   showUp: {
     type: Object,
     default: {
@@ -46,6 +53,11 @@ const props = defineProps({
       name: 'nama'
     }
   },
+  tgl: {
+    type: String,
+    default: ''
+  },
+
   modelValue: [String, Number],
   required: {
     type   : Boolean,
@@ -53,7 +65,7 @@ const props = defineProps({
   }
 })
 
-const emits = defineEmits(['searchEvent', 'update:modelValue', 'clearData', 'setName'])
+const emits = defineEmits(['searchEvent', 'update:modelValue', 'clearData'])
 
 const searchPayload = ref('')
 
@@ -68,9 +80,17 @@ const handleInput = (event: Event) => {
   }
 }
 
-const setNameValue = (name: string) => {
-  searchPayload.value = name
-  emits('setName')
+const checkDataExists = (id: number, tgl: string):boolean => {
+  // return props.listSchedule.some((item: { guru_id: number }) => item.guru_id === id);
+  const filteredData = props.listSchedule.filter((item: { guru_id: number; tgl: string }) => item.guru_id === id && item.tgl === tgl);
+  return filteredData.length === 2;
+}
+
+const formatDate = (date: string): string => {
+  const [year, month, day] = date.split("-");
+  const formattedMonth = month.padStart(2, "0");
+  const formattedDay = day.padStart(2, "0");
+  return `${year}-${formattedMonth}-${formattedDay}`;
 }
 
 const delList = (): void => {
