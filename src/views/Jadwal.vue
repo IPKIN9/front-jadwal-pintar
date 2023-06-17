@@ -22,7 +22,7 @@
             <BaseSelect @change="getCalendar()" label="Bulan" :list="bulan" v-model.number="datePayload.bulan" />
           </div>
           <div class="col-lg-4">
-            <BaseSelect label="Tahun" />
+            <BaseSelect label="Tahun" :list="tahun" v-model="datePayload.tahun" @change="getCalendar()" />
           </div>
         </div>
         <div class="mt-5" v-show="scheduleMeta.kelas_id !== 0">
@@ -303,7 +303,6 @@ const getKelasPayload = (kelasPayload: any): void => {
   })
   .then((res) => {
     kelasList.value = res.data.data
-    console.log(res.data.data);
   })
   .catch((err) => {
     console.log(err);
@@ -463,6 +462,23 @@ const bulan = [
   {lable: 'desember' , val: 12}
 ]
 
+const tahun = ref<any[]>([])
+
+const getTahun = () => {
+  const tahunSekarang = new Date().getFullYear();
+  for (let i = 1; i >= 0; i--) {
+      tahun.value.push({lable: (tahunSekarang - i).toString(), val: (tahunSekarang - i)});
+    }
+
+    // Mengisi array dengan rentang dua tahun ke depan
+    for (let i = 1; i <= 2; i++) {
+      tahun.value.push({lable: (tahunSekarang + i).toString(), val: (tahunSekarang - i)});
+    }
+
+    // Mengurutkan array tahun dari terkecil hingga terbesar
+    tahun.value.sort();
+}
+
 const getMonthName = (monthVal: number) => {
   const month = bulan.find(item => item.val === monthVal);
 
@@ -502,5 +518,6 @@ const showHideModal = (properties: any): void => {
 
 onMounted(() => {
   getCalendar()
+  getTahun()
 })
 </script>
