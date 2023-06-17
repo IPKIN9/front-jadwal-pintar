@@ -44,6 +44,12 @@
             </li>
           </ul>
         </li>
+        <li class="sidebar-item" :class="$route.name === 'jadwal' ? 'active' : ''">
+          <router-link href="#" class="sidebar-link" :to="{name: 'jadwal'}">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Jadwal</span>
+          </router-link>
+        </li>
       </ul>
     </div>
     <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>

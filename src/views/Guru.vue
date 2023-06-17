@@ -282,7 +282,7 @@ const upsertPayload = async () => {
       nip: Yup.string()
       .typeError('Field harus berisi huruf')
       .required('Field harus diisi')
-      .min(15, 'Field minimal terdiri dari 2 karakter')
+      .min(15, 'Field minimal terdiri dari 15 karakter')
       .max(20, 'Field maksimal terdiri dari 20 karakter'),
       mapel_id: Yup.number()
       .typeError('Field harus bertipe nomor')

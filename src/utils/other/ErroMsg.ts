@@ -37,6 +37,12 @@ export default (code: number) => {
         message: 'Maaf, Anda tidak memiliki otorisasi untuk mengakses halaman ini'
       }
       break;
+    case 409:
+      msg = {
+        title: 'Jadwal Konflik',
+        message: 'Maaf, Data yang anda masukan telah memiliki jadwal dikelas lain'
+      }
+      break;
     case 503:
       msg = {
         title: 'Peningkatan Layanan',
