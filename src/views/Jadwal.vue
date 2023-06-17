@@ -303,6 +303,7 @@ const getKelasPayload = (kelasPayload: any): void => {
   })
   .then((res) => {
     kelasList.value = res.data.data
+    console.log(res.data.data);
   })
   .catch((err) => {
     console.log(err);
