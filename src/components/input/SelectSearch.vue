@@ -92,7 +92,7 @@ const handleInput = (event: Event) => {
 
 const setNameValue = (name: string) => {
   searchPayload.value = name
-  emits('setName')
+  emits('setName', name)
 }
 
 const clearInput = () => {

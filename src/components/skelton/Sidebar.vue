@@ -50,6 +50,12 @@
             <span>Jadwal</span>
           </router-link>
         </li>
+        <li class="sidebar-item" :class="$route.name === 'export' ? 'active' : ''">
+          <router-link href="#" class="sidebar-link" :to="{name: 'export'}">
+            <i class="fa-solid fa-download"></i>
+            <span>Export</span>
+          </router-link>
+        </li>
       </ul>
     </div>
     <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>

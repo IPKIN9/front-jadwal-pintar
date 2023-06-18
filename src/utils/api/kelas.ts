@@ -4,9 +4,9 @@ const baseUrl : string = import.meta.env.VITE_SERVICE_URL
 const endPoint: string = "/v1/kelas/"
 
 export default {
-  getAll(params: {limit: number; page: number; search: string; orderBy: string; sort: string}) {
+  getAll(params: {limit: number; page: number; search: string; jurusan_id: number | null; orderBy: string; sort: string}) {
     return server(baseUrl).get(
-      `${endPoint}?search=${params.search}&limit=${params.limit}&page=${params.page}&orderBy=${params.orderBy}&sort=${params.sort}`
+      `${endPoint}?search=${params.search}&jurusan_id=${params.jurusan_id}&limit=${params.limit}&page=${params.page}&orderBy=${params.orderBy}&sort=${params.sort}`
     )
   },
 

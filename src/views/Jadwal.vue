@@ -255,8 +255,11 @@ const getSchedule = async () => {
     }
   })
   .catch((err) => {
-    console.log(err);
-    
+    if (err.response) {
+      IziToast.errorNotif(err.response.status)
+    } else {
+      IziToast.errorNotif(900)
+    }
   })
 }
 
@@ -267,8 +270,11 @@ const getAllSchedule = async () => {
     allScheduleList.value = data
   })
   .catch((err) => {
-    console.log(err);
-    
+    if (err.response) {
+      IziToast.errorNotif(err.response.status)
+    } else {
+      IziToast.errorNotif(900)
+    }
   })
 }
 
@@ -368,7 +374,11 @@ const deleteSchedule = (params: any): void => {
     getCalendar()
   })
   .catch((err) => {
-    console.log(err);
+    if (err.response) {
+      IziToast.errorNotif(err.response.status)
+    } else {
+      IziToast.errorNotif(900)
+    }
   })
 }
 
@@ -394,6 +404,7 @@ const kelasShow: {key:string, name: string} = {
 
 const getKelasPayload = (kelasPayload: any): void => {
   kelas.getAll({
+    jurusan_id: 0,
     search: kelasPayload,
     limit: 50,
     page: 1,
@@ -404,8 +415,11 @@ const getKelasPayload = (kelasPayload: any): void => {
     kelasList.value = res.data.data
   })
   .catch((err) => {
-    console.log(err);
-    
+    if (err.response) {
+      IziToast.errorNotif(err.response.status)
+    } else {
+      IziToast.errorNotif(900)
+    }
   })
 }
 
@@ -460,8 +474,11 @@ const getMapelList = (mapelPayload: string) => {
     mapelList.value = res.data.data
   })
   .catch((err) => {
-    console.log(err);
-    
+    if (err.response) {
+      IziToast.errorNotif(err.response.status)
+    } else {
+      IziToast.errorNotif(900)
+    }
   })
 }
 
@@ -629,11 +646,6 @@ const showHideModal = (properties: any): void => {
     dateNow.val  = properties.val
   }
 }
-
-// const  speakerInitials = (speaker:string) => {
-//   const name = speaker.split(' ')
-//   return `${name[0].charAt(0)}${name[1] ? name[1].charAt(0) : ''}`;
-// }
 
 onMounted(() => {
   getCalendar()
