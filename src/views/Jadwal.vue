@@ -1,85 +1,98 @@
 <template>
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <div class="d-flex justify-content-between">
-          <div class="input-group">
-            <h3>TABEL KELAS</h3>
+  <div id="sidebar" class="active">
+    <Sidebar />
+  </div>
+  <div id="main">
+    <Header/>
+
+    <div class="page-content">
+      <section class="row">
+        <section class="section">
+          <div class="card">
+            <div class="card-header">
+              <div class="d-flex justify-content-between">
+                <div class="input-group">
+                  <h3>TABEL KELAS</h3>
+                </div>
+                <div class="input-group">
+                </div>
+                <div class="input-group row ms-1">
+                  <p class="col-lg text-end"><i class="fa-solid fa-user me-1"></i> User: ADMIN</p>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row mt-3">
+                <div class="col-lg-4">
+                  <SelectSearch @change="getCalendar" :id-element="{search: 'input-search-params', select: 'input-select-params'}" @setName="clearKelas" size="5" @search-event="getKelasPayload" @clear-data="clearKelas" :required="true" :list="kelasList" :show-up="kelasShow" v-model.number="scheduleMeta.kelas_id" label="Pilih Kelas" class="rounded-3" />
+                </div>
+                <div class="col-lg-4">
+                  <BaseSelect @change="getCalendar()" label="Bulan" :list="bulan" v-model.number="datePayload.bulan" />
+                </div>
+                <div class="col-lg-4">
+                  <BaseSelect label="Tahun" :list="tahun" v-model="datePayload.tahun" @change="getCalendar()" />
+                </div>
+              </div>
+              <div class="mt-5" v-show="scheduleMeta.kelas_id !== 0">
+                <table class="table table-bordered mb-0">
+                  <thead>
+                    <tr>
+                      <th class="cs-th">SENIN</th>
+                      <th class="cs-th">SELASA</th>
+                      <th class="cs-th">RABU</th>
+                      <th class="cs-th">KAMIS</th>
+                      <th class="cs-th">JUMAT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(week, index) in newDates" :key="index">
+                      <td class="cs-td" v-for="(day, index2) in week" :key="index2" >
+                        <a href="#" role="button" @click="getDetail({show:`${day.tgl} ${getMonthName(day.bulan)} ${day.tahun}`, val:`${day.tahun}-${day.bulan}-${day.tgl}`, type: 'new', kelasId: scheduleMeta.kelas_id}, {data: day.data})" :class="
+                          (day.bulan === (datePayload.bulan - 1) && day.bulan !== 12) || 
+                          (day.bulan === (datePayload.bulan + 1) && day.bulan !== 12) ||
+                          ((datePayload.bulan === 12 && (day.bulan === 1 || day.bulan === 11)) || 
+                          (datePayload.bulan === 1 && (day.bulan === 12) || day.bulan === 2) && day.bulan != 2)? 'disabled' : ''">
+                          <div class="px-2 pt-2 row">
+                            <div class="col-lg-3">
+                              <h3>{{ day.tgl }}</h3>
+                            </div>
+                            <div v-if="day.data.length >= 2" class="col-lg d-flex justify-content-end">
+                              <div class=""><span class="badge bg-success">Full</span></div>
+                            </div>
+                            <div v-if="day.data.length === 1" class="col-lg d-flex justify-content-end">
+                              <div class=""><span class="badge bg-primary">1 Sesi</span></div>
+                            </div>
+                            <div v-if="day.data.length === 0" class="col-lg d-flex justify-content-end">
+                              <div class=""><span class="badge bg-light-secondary">Kosong</span></div>
+                            </div>
+                          </div>
+                          <div class="row px-2 my-3" v-for="(d, index3) in day.data" :key="index3">
+                            <div class="col-lg-12">
+                              <div class="d-flex">
+                                <small><span class="text-capitalize">{{ d.mapel }}</span> :<span> {{ d.guru }}</span></small>
+                              </div>
+                              <div class="d-flex"><small class="px-2 rounded-3"  style="background: #DDE6ED;">{{ d.jam_masuk }} - {{ d.jam_keluar }} WITA</small></div>
+                            </div>
+                          </div>
+                          <div v-if="day.data.length <= 0" class="row px-2" style="margin: 43px 0;">
+                            <div class="col-lg-12">
+                              <div class="d-flex"><small class="px-2 py-2 rounded-3 text-muted">set sekarang</small></div>
+                            </div>
+                          </div>
+                        </a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-          <div class="input-group">
-          </div>
-          <div class="input-group row ms-1">
-            <p class="col-lg text-end"><i class="fa-solid fa-user me-1"></i> User: ADMIN</p>
-          </div>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="row mt-3">
-          <div class="col-lg-4">
-            <SelectSearch @change="getCalendar" :id-element="{search: 'input-search-params', select: 'input-select-params'}" @setName="clearKelas" size="5" @search-event="getKelasPayload" @clear-data="clearKelas" :required="true" :list="kelasList" :show-up="kelasShow" v-model.number="scheduleMeta.kelas_id" label="Pilih Kelas" class="rounded-3" />
-          </div>
-          <div class="col-lg-4">
-            <BaseSelect @change="getCalendar()" label="Bulan" :list="bulan" v-model.number="datePayload.bulan" />
-          </div>
-          <div class="col-lg-4">
-            <BaseSelect label="Tahun" :list="tahun" v-model="datePayload.tahun" @change="getCalendar()" />
-          </div>
-        </div>
-        <div class="mt-5" v-show="scheduleMeta.kelas_id !== 0">
-          <table class="table table-bordered mb-0">
-            <thead>
-              <tr>
-                <th class="cs-th">SENIN</th>
-                <th class="cs-th">SELASA</th>
-                <th class="cs-th">RABU</th>
-                <th class="cs-th">KAMIS</th>
-                <th class="cs-th">JUMAT</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(week, index) in newDates" :key="index">
-                <td class="cs-td" v-for="(day, index2) in week" :key="index2" >
-                  <a href="#" role="button" @click="getDetail({show:`${day.tgl} ${getMonthName(day.bulan)} ${day.tahun}`, val:`${day.tahun}-${day.bulan}-${day.tgl}`, type: 'new', kelasId: scheduleMeta.kelas_id}, {data: day.data})" :class="
-                    (day.bulan === (datePayload.bulan - 1) && day.bulan !== 12) || 
-                    (day.bulan === (datePayload.bulan + 1) && day.bulan !== 12) ||
-                    ((datePayload.bulan === 12 && (day.bulan === 1 || day.bulan === 11)) || 
-                    (datePayload.bulan === 1 && (day.bulan === 12) || day.bulan === 2) && day.bulan != 2)? 'disabled' : ''">
-                    <div class="px-2 pt-2 row">
-                      <div class="col-lg-3">
-                        <h3>{{ day.tgl }}</h3>
-                      </div>
-                      <div v-if="day.data.length >= 2" class="col-lg d-flex justify-content-end">
-                        <div class=""><span class="badge bg-success">Full</span></div>
-                      </div>
-                      <div v-if="day.data.length === 1" class="col-lg d-flex justify-content-end">
-                        <div class=""><span class="badge bg-primary">1 Sesi</span></div>
-                      </div>
-                      <div v-if="day.data.length === 0" class="col-lg d-flex justify-content-end">
-                        <div class=""><span class="badge bg-light-secondary">Kosong</span></div>
-                      </div>
-                    </div>
-                    <div class="row px-2 my-3" v-for="(d, index3) in day.data" :key="index3">
-                      <div class="col-lg-12">
-                        <div class="d-flex">
-                          <small><span class="text-capitalize">{{ d.mapel }}</span> :<span> {{ d.guru }}</span></small>
-                        </div>
-                        <div class="d-flex"><small class="px-2 rounded-3"  style="background: #DDE6ED;">{{ d.jam_masuk }} - {{ d.jam_keluar }} WITA</small></div>
-                      </div>
-                    </div>
-                    <div v-if="day.data.length <= 0" class="row px-2" style="margin: 43px 0;">
-                      <div class="col-lg-12">
-                        <div class="d-flex"><small class="px-2 py-2 rounded-3 text-muted">set sekarang</small></div>
-                      </div>
-                    </div>
-                  </a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        </section>
+      </section>
     </div>
-  </section>
+    
+    <Footer/>
+  </div>
   <ModalComponent size="modal-lg" :is-modal-open="modalStatus" @close="showHideModal" ref="modal">
     <template v-slot:header>
       <h4 class="tex-center"><i class="fa-solid fa-file-invoice me-2 text-capitalize"></i> Jadwal Hari Ini - {{ dateNow.show }}</h4>
@@ -220,6 +233,9 @@ import BaseSelectSchedule from '../components/input/BaseSelectSchedule.vue'
 import kelas from '@/utils/api/kelas';
 import IziToast from '@/utils/other/IziToast';
 import * as Yup from 'yup'
+import Sidebar from '@/components/skelton/Sidebar.vue';
+import Header from '@/components/skelton/Header.vue';
+import Footer from '@/components/skelton/Footer.vue';
 
 const loading = ref(false)
 
