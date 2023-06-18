@@ -1,78 +1,91 @@
 <template>
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <div class="d-flex justify-content-between">
-          <h3>TABEL KELAS</h3>
-          <BaseButton class="btn-primary" @event-click="showHideModal({ type: 'new-data' })">Tambah Data</BaseButton>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
-          <div class="dataTable-top d-flex justify-content-between">
-            <div class="dataTable-dropdown">
-              <select class="dataTable-selector form-select" v-model.number="meta.limit" @change="getPayloadList()">
-                <option value="10">10</option>
-                <option value="15">15</option>
-                <option value="20">20</option>
-                <option value="25">25</option>
-              </select><label>entries per page</label>
+  <div id="sidebar" class="active">
+    <Sidebar />
+  </div>
+  <div id="main">
+    <Header/>
+
+    <div class="page-content">
+      <section class="row">
+        <section class="section">
+          <div class="card">
+            <div class="card-header">
+              <div class="d-flex justify-content-between">
+                <h3>TABEL KELAS</h3>
+                <BaseButton class="btn-primary" @event-click="showHideModal({ type: 'new-data' })">Tambah Data</BaseButton>
+              </div>
             </div>
-            <div class="dataTable-search">
-              <div class="input-group">
-                <span class="input-group-text" id="basic-addon1"><i class="bi bi-search"></i></span>
-                <input class="dataTable-input" placeholder="Search..." type="text" v-model="meta.search"
-                  @keyup="getPayloadList()">
+            <div class="card-body">
+              <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
+                <div class="dataTable-top d-flex justify-content-between">
+                  <div class="dataTable-dropdown">
+                    <select class="dataTable-selector form-select" v-model.number="meta.limit" @change="getPayloadList()">
+                      <option value="10">10</option>
+                      <option value="15">15</option>
+                      <option value="20">20</option>
+                      <option value="25">25</option>
+                    </select><label>entries per page</label>
+                  </div>
+                  <div class="dataTable-search">
+                    <div class="input-group">
+                      <span class="input-group-text" id="basic-addon1"><i class="bi bi-search"></i></span>
+                      <input class="dataTable-input" placeholder="Search..." type="text" v-model="meta.search"
+                        @keyup="getPayloadList()">
+                    </div>
+                  </div>
+                </div>
+                <div class="dataTable-container mt-3">
+                  <table class="table" id="table1">
+                    <thead>
+                      <tr>
+                        <th style="width: 5%;"><a href="#">No.</a></th>
+                        <th style="width: 25.862%;"><a @click="sortingData(meta.sort, '_kelas')" href="#"
+                            class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon._kelas"></i> Nama</a></th>
+                        <th style="width: 25.862%;"><a @click="sortingData(meta.sort, '_jurusan')" href="#"
+                            class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon._jurusan"></i> Jurusan</a></th>
+                        <th style="width: 18.8881%;"><a @click="sortingData(meta.sort, 'created_at')" href="#"
+                            class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon.created_at"></i> Dibuat</a>
+                        </th>
+                        <th style="width: 16.3429%;"><a href="#" class="dataTable-sorter">Diupdate</a></th>
+                        <th style="width: 11.1186%;"><a href="#" class="dataTable-sorter">Aksi</a></th>
+                      </tr>
+                    </thead>
+                    <TransitionGroup name="table" tag="tbody">
+                      <tr v-for="(kelas, index) in payloadList" :key="index">
+                        <td>{{ index + 1 }}.</td>
+                        <td class="text-capitalize">{{ kelas._kelas }}</td>
+                        <td class="text-capitalize">{{ kelas._jurusan }}</td>
+                        <td>{{ moment(kelas.created_at).format('DD, MMMM YYYY') }}</td>
+                        <td>{{ moment(kelas.updated_at).format('DD, MMMM YYYY') }}</td>
+                        <td>
+                          <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+                            <BaseButton :data-id="kelas.id" :row-data="payloadList[index]" @event-click="editPayload"
+                              class="btn"><i class="text-primary fas fa-pencil mx-2"></i></BaseButton>
+                            <BaseButton :data-id="kelas.id" class="btn" @event-click="deletePayload"><i
+                                class="text-danger fas fa-trash mx-2"></i></BaseButton>
+                          </div>
+                        </td>
+                      </tr>
+                    </TransitionGroup>
+                  </table>
+                  <TransitionGroup name="defend" tag="div" class="d-flex justify-content-center" >
+                    <h5 class="text-muted py-3" v-if="meta.total === 0 && meta.search.length === 0">Belum ada data dalam tabel ini!</h5>
+                    <h5 class="text-muted py-3" v-if="meta.total_in_page === 0 && meta.search.length >= 1">Data tidak ditemukan!</h5>
+                  </TransitionGroup>
+                </div>
+                <Transition>
+                  <Paggination v-show="meta.search.length <= 0 && meta.total > meta.limit" :page="meta.page" :total="meta.total" :limit="meta.limit"
+                    @event-click="paggination" />
+                </Transition>
               </div>
             </div>
           </div>
-          <div class="dataTable-container mt-3">
-            <table class="table" id="table1">
-              <thead>
-                <tr>
-                  <th style="width: 5%;"><a href="#">No.</a></th>
-                  <th style="width: 25.862%;"><a @click="sortingData(meta.sort, '_kelas')" href="#"
-                      class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon._kelas"></i> Nama</a></th>
-                  <th style="width: 25.862%;"><a @click="sortingData(meta.sort, '_jurusan')" href="#"
-                      class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon._jurusan"></i> Jurusan</a></th>
-                  <th style="width: 18.8881%;"><a @click="sortingData(meta.sort, 'created_at')" href="#"
-                      class="dataTable-sorter"><i class="fa-solid me-1" :class="meta.sortIcon.created_at"></i> Dibuat</a>
-                  </th>
-                  <th style="width: 16.3429%;"><a href="#" class="dataTable-sorter">Diupdate</a></th>
-                  <th style="width: 11.1186%;"><a href="#" class="dataTable-sorter">Aksi</a></th>
-                </tr>
-              </thead>
-              <TransitionGroup name="table" tag="tbody">
-                <tr v-for="(kelas, index) in payloadList" :key="index">
-                  <td>{{ index + 1 }}.</td>
-                  <td class="text-capitalize">{{ kelas._kelas }}</td>
-                  <td class="text-capitalize">{{ kelas._jurusan }}</td>
-                  <td>{{ moment(kelas.created_at).format('DD, MMMM YYYY') }}</td>
-                  <td>{{ moment(kelas.updated_at).format('DD, MMMM YYYY') }}</td>
-                  <td>
-                    <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                      <BaseButton :data-id="kelas.id" :row-data="payloadList[index]" @event-click="editPayload"
-                        class="btn"><i class="text-primary fas fa-pencil mx-2"></i></BaseButton>
-                      <BaseButton :data-id="kelas.id" class="btn" @event-click="deletePayload"><i
-                          class="text-danger fas fa-trash mx-2"></i></BaseButton>
-                    </div>
-                  </td>
-                </tr>
-              </TransitionGroup>
-            </table>
-            <TransitionGroup name="defend" tag="div" class="d-flex justify-content-center" >
-              <h5 class="text-muted py-3" v-if="meta.total === 0">Belum ada data dalam tabel ini!</h5>
-              <h5 class="text-muted py-3" v-if="meta.total_in_page === 0 && meta.total !== 0">Data tidak ditemukan!</h5>
-            </TransitionGroup>
-          </div>
-          <Transition>
-            <Paggination v-show="meta.search.length <= 0 && meta.total > meta.limit" :page="meta.page" :total="meta.total" :limit="meta.limit"
-              @event-click="paggination" />
-          </Transition>
-        </div>
-      </div>
+        </section>
+      </section>
     </div>
-  </section>
+    
+    <Footer/>
+  </div>
   <ModalComponent size="modal-lg" :is-modal-open="modalStatus" @close="showHideModal" ref="modal">
     <template v-slot:header>
       <h4><i class="fa-solid fa-file-invoice me-2"></i> Formulir Data</h4>
@@ -87,7 +100,7 @@
           </small>
         </div>
         <div class="form-group mb-3">
-          <SelectSearch size="5" @search-event="getJurusanPayload" :required="true" @clear-data="clearJurusan" label="Jurusan" :list="jurusanList" :show-up="jurusanShow" v-model.number="payload.jurusan_id" />
+          <SelectSearchFixed size="5" @search-event="getJurusanPayload" :required="true" @clear-data="clearJurusan" label="Jurusan" :list="jurusanList" :show-up="jurusanShow" v-model.number="payload.jurusan_id" />
           <small class="text-danger">
             {{ kelasError.jurusan_id }}
           </small>
@@ -154,8 +167,11 @@ import SweetAlert from '../utils/other/SweetAlert'
 import IziToast from '../utils/other/IziToast'
 import Loading from '@/components/other/Loading.vue'
 import * as Yup from 'yup'
-import SelectSearch from '@/components/input/SelectSearch.vue'
 import jurusan from '@/utils/api/jurusan'
+import Sidebar from '@/components/skelton/Sidebar.vue'
+import Header from '@/components/skelton/Header.vue'
+import Footer from '@/components/skelton/Footer.vue'
+import SelectSearchFixed from '@/components/input/SelectSearchFixed.vue'
 
 const loading = ref(false)
 
@@ -170,6 +186,7 @@ interface SortIcon {
 
 interface Meta {
   sortIcon     : SortIcon,
+  jurusan_id   : number;
   search       : string;
   limit        : number;
   page         : number;
@@ -185,6 +202,7 @@ const meta: Meta = reactive({
     _jurusan   : 'fa-sort',
     created_at : 'fa-sort-up'
   },
+  jurusan_id   : 0,
   search       : "",
   limit        : 10,
   page         : 1,

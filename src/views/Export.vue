@@ -1,32 +1,45 @@
 <template>
-  <section class="section">
-    <div class="card">
-      <div class="card-header">
-        <div class="d-flex justify-content-between">
-          <h3>Export Data</h3>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-lg-6">
-            <SelectSearch label="Pilih Jurusan" size="5"
-              :id-element="{ search: 'input-search-jurusan', select: 'input-select-jurusan' }" :required="true"
-              @search-event="getJurusanPayload" @set-name="clearJurusan" @clear-data="clearJurusan" :list="jurusanList"
-              :show-up="jurusanShow" v-model="meta.jurusan_id" />
+    <div id="sidebar" class="active">
+    <Sidebar />
+  </div>
+  <div id="main">
+    <Header/>
+
+    <div class="page-content">
+      <section class="row">
+        <section class="section">
+          <div class="card">
+            <div class="card-header">
+              <div class="d-flex justify-content-between">
+                <h3>Export Data</h3>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-lg-6">
+                  <SelectSearch label="Pilih Jurusan" size="5"
+                    :id-element="{ search: 'input-search-jurusan', select: 'input-select-jurusan' }" :required="true"
+                    @search-event="getJurusanPayload" @set-name="clearJurusan" @clear-data="clearJurusan" :list="jurusanList"
+                    :show-up="jurusanShow" v-model="meta.jurusan_id" />
+                </div>
+                <div class="col-lg">
+                  <DateTimePicker placeholder="Pilih tanggal mulai" type="start" :end-date="meta.end" v-model="meta.start" class="mt-4" />
+                </div>
+                <div class="col-lg">
+                  <DateTimePicker placeholder="Pilih tanggal akhir" type="end" :start-date="meta.start" v-model="meta.end" class="mt-4" />
+                </div>
+                <div class="col-lg">
+                  <BaseButton @event-click="getReportPayload" class="btn-primary mt-4 float-end">Download Data</BaseButton>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="col-lg">
-            <DateTimePicker placeholder="Pilih tanggal mulai" type="start" :end-date="meta.end" v-model="meta.start" class="mt-4" />
-          </div>
-          <div class="col-lg">
-            <DateTimePicker placeholder="Pilih tanggal akhir" type="end" :start-date="meta.start" v-model="meta.end" class="mt-4" />
-          </div>
-          <div class="col-lg">
-            <BaseButton @event-click="getReportPayload" class="btn-primary mt-4 float-end">Download Data</BaseButton>
-          </div>
-        </div>
-      </div>
+        </section>
+      </section>
     </div>
-  </section>
+    
+    <Footer/>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -41,6 +54,9 @@ import DateTimePicker from '@/components/input/DateTimePicker.vue'
 import report from '@/utils/api/report'
 import jurusan from '@/utils/api/jurusan'
 import Report from '@/utils/other/Report'
+import Sidebar from '@/components/skelton/Sidebar.vue'
+import Header from '@/components/skelton/Header.vue'
+import Footer from '@/components/skelton/Footer.vue'
 
 /* Fungsi untuk mengambil data jadwal */
 interface Meta {
