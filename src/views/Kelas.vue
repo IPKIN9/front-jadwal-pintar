@@ -100,7 +100,7 @@
           </small>
         </div>
         <div class="form-group mb-3">
-          <SelectSearch size="5" @search-event="getJurusanPayload" :required="true" @clear-data="clearJurusan" label="Jurusan" :list="jurusanList" :show-up="jurusanShow" v-model.number="payload.jurusan_id" />
+          <SelectSearchFixed size="5" @search-event="getJurusanPayload" :required="true" @clear-data="clearJurusan" label="Jurusan" :list="jurusanList" :show-up="jurusanShow" v-model.number="payload.jurusan_id" />
           <small class="text-danger">
             {{ kelasError.jurusan_id }}
           </small>
@@ -167,11 +167,11 @@ import SweetAlert from '../utils/other/SweetAlert'
 import IziToast from '../utils/other/IziToast'
 import Loading from '@/components/other/Loading.vue'
 import * as Yup from 'yup'
-import SelectSearch from '@/components/input/SelectSearch.vue'
 import jurusan from '@/utils/api/jurusan'
 import Sidebar from '@/components/skelton/Sidebar.vue'
 import Header from '@/components/skelton/Header.vue'
 import Footer from '@/components/skelton/Footer.vue'
+import SelectSearchFixed from '@/components/input/SelectSearchFixed.vue'
 
 const loading = ref(false)
 

@@ -120,13 +120,13 @@
         </div>
         <div class="row">
           <div class="col-lg mx-3 form-group mb-4">
-            <SelectSearch size="5" @search-event="getpangkatPayload" :required="true" @clear-data="clearPangkat" label="Pangkat" :list="pangkatList" :show-up="pangkatShow" v-model.number="payload.pangkat_id" />
+            <SelectSearchFixed size="5" @search-event="getpangkatPayload" :required="true" @clear-data="clearPangkat" label="Pangkat" :list="pangkatList" :show-up="pangkatShow" v-model.number="payload.pangkat_id" />
             <small class="text-danger">
               {{ guruError.mapel_id }}
             </small>
           </div>
           <div class="col-lg mx-3 form-group mb-4">
-            <SelectSearch size="5" @search-event="getMapelPayload" :required="true" @clear-data="clearMapel" label="Mata Pelajaran" :list="mapelList" :show-up="mapelShow" v-model.number="payload.mapel_id" />
+            <SelectSearchFixed size="5" @search-event="getMapelPayload" :required="true" @clear-data="clearMapel" label="Mata Pelajaran" :list="mapelList" :show-up="mapelShow" v-model.number="payload.mapel_id" />
             <small class="text-danger">
               {{ guruError.mapel_id }}
             </small>
@@ -214,6 +214,7 @@ import pangkat from '@/utils/api/pangkat'
 import Header from '@/components/skelton/Header.vue'
 import Footer from '@/components/skelton/Footer.vue'
 import Sidebar from '@/components/skelton/Sidebar.vue'
+import SelectSearchFixed from '@/components/input/SelectSearchFixed.vue'
 
 const loading = ref(false)
 

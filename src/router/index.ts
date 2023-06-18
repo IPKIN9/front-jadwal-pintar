@@ -49,13 +49,21 @@ const tokenGuard = (to: any, from: any, next: any) => {
   }
 }
 
+const loginGuard = (to: any, from: any, next: any) => {
+  if (AuthConfig.checkToken()) {
+    next('/')
+  } else {
+    next()
+  }
+}
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      name: 'jadwal',
+      component: Jadwal,
       beforeEnter: tokenGuard
     },
     {
@@ -89,12 +97,6 @@ const router = createRouter({
       beforeEnter: tokenGuard
     },
     {
-      path: '/jadwal',
-      name: 'jadwal',
-      component: Jadwal,
-      beforeEnter: tokenGuard
-    },
-    {
       path: '/export',
       name: 'export',
       component: Export,
@@ -104,7 +106,7 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: Login,
-      beforeEnter: deviceGuard
+      beforeEnter: [deviceGuard, loginGuard]
     },
     {
       path: "/:catchAll(.*)",

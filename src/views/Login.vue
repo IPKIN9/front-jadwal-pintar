@@ -42,7 +42,7 @@
 
   </div>
 </template>
-<style>
+<style scoped>
   @import url('../assets/css/pages/auth.css');
   #myIframe{
     all: unset;

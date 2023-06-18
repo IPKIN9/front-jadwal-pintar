@@ -15,5 +15,22 @@ export default {
         callback()
       }
     })
+  },
+
+  confirmLogout(callback: () => void): void {
+    Swal.fire({
+      title: 'Logout?',
+      text: "Anda akan ke halaman login!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Logout',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        callback()
+      }
+    })
   }
 }

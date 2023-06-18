@@ -12,7 +12,7 @@
             <div class="card-header">
               <div class="d-flex justify-content-between">
                 <div class="input-group">
-                  <h3>TABEL KELAS</h3>
+                  <h3>TABEL JADWAL</h3>
                 </div>
                 <div class="input-group">
                 </div>
