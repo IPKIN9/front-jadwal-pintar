@@ -85,10 +85,11 @@ interface Payload {
 }
 
 const grantSecret = import.meta.env.VITE_GRANT_SECRET
+const grantID = import.meta.env.VITE_GRANT_ID
 
 const payload: Payload = reactive({
   grant_type   : 'password',
-  client_id    : "1",
+  client_id    : grantID,
   client_secret: grantSecret,
   username     : '',
   password     : '',
