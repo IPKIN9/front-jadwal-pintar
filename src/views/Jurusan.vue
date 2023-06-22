@@ -161,6 +161,7 @@ import * as Yup from 'yup'
 import Sidebar from '@/components/skelton/Sidebar.vue'
 import Header from '@/components/skelton/Header.vue'
 import Footer from '@/components/skelton/Footer.vue'
+import axios from 'axios'
 
 const loading = ref(false)
 
@@ -198,7 +199,14 @@ const meta: Meta = reactive({
 })
 
 const getPayloadList = (): void => {
-  jurusan.getAll(meta)
+  let url = import.meta.env.VITE_SERVICE_URL
+  axios.create({
+    baseURL: import.meta.env.VITE_SERVICE_URL,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  }).get(`${url}v1/jurusan/?search=${meta.search}&limit=${meta.limit}&page=${meta.page}&orderBy=${meta.orderBy}&sort=${meta.sort}`)
+  // jurusan.getAll(meta)
     .then((res: any) => {
       let item           = res.data
       payloadList.value  = item.data
